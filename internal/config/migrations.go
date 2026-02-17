@@ -97,6 +97,69 @@ func RunMigrations(db *sql.DB) error {
 		`,
 	}
 
+	classMigrations := []string{
+		`CREATE TABLE IF NOT EXISTS classes (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name VARCHAR(50) UNIQUE NOT NULL,
+			level VARCHAR(20),
+			description TEXT,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`INSERT OR IGNORE INTO classes (name, level, description) VALUES 
+			('X-RPL', 'X', 'Rekayasa Perangkat Lunak'),
+			('XI-RPL', 'XI', 'Rekayasa Perangkat Lunak'),
+			('XII-RPL', 'XII', 'Rekayasa Perangkat Lunak')
+		`,
+	}
+	migrations = append(migrations, classMigrations...)
+
+	badgeMigrations := []string{
+		`CREATE TABLE IF NOT EXISTS badges (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name VARCHAR(100) NOT NULL,
+			description TEXT,
+			icon VARCHAR(50),
+			criteria_type VARCHAR(50),
+			criteria_value INTEGER,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		)`,
+		`CREATE TABLE IF NOT EXISTS user_badges (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			user_id INTEGER NOT NULL,
+			badge_id INTEGER NOT NULL,
+			earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (badge_id) REFERENCES badges(id),
+			UNIQUE(user_id, badge_id)
+		)`,
+		`INSERT OR IGNORE INTO badges (name, description, icon, criteria_type, criteria_value) VALUES 
+			('Awal Langkah', 'Menyelesaikan shalat 5 waktu pertama kali', 'star', 'prayer_count', 1),
+			('Istiqomah 7 Hari', 'Shalat 5 waktu berturut-turut selama 7 hari', 'fire', 'prayer_streak', 7),
+			('Istiqomah 30 Hari', 'Shalat 5 waktu berturut-turut selama 30 hari', 'award', 'prayer_streak', 30),
+			('Pembaca Al-Quran', 'Mulai membaca Al-Quran', 'book-open', 'quran_readings', 1),
+			('Khatam 1 Juz', 'Menyelesaikan 1 Juz Al-Quran', 'book', 'quran_juz', 1),
+			('Khatam Al-Quran', 'Menyelesaikan 30 Juz Al-Quran', 'check-circle', 'quran_khatam', 30),
+			('Dermawan', 'Mendapatkan 100 poin amaliah', 'heart', 'amaliah_points', 100),
+			('Ahli Ibadah', 'Mendapatkan 500 poin amaliah', 'sun', 'amaliah_points', 500),
+			('Sang Juara', 'Mendapatkan 1000 poin amaliah', 'trophy', 'amaliah_points', 1000)
+		`,
+	}
+
+	migrations = append(migrations, badgeMigrations...)
+
+	// Performance Indexes
+	indexMigrations := []string{
+		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
+		`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`,
+		`CREATE INDEX IF NOT EXISTS idx_prayers_user_date ON prayers(user_id, date)`,
+		`CREATE INDEX IF NOT EXISTS idx_fastings_user_date ON fastings(user_id, date)`,
+		`CREATE INDEX IF NOT EXISTS idx_quran_user_date ON quran_readings(user_id, date)`,
+		`CREATE INDEX IF NOT EXISTS idx_amaliah_user_date ON daily_amaliah(user_id, date)`,
+		`CREATE INDEX IF NOT EXISTS idx_user_badges_user ON user_badges(user_id)`,
+	}
+	migrations = append(migrations, indexMigrations...)
+
 	for i, migration := range migrations {
 		_, err := db.Exec(migration)
 		if err != nil {

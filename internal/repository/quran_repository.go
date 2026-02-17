@@ -97,6 +97,31 @@ func (r *QuranRepository) GetTotalPagesRead(userID int, startDate, endDate strin
 	return total, err
 }
 
+func (r *QuranRepository) GetByDateRange(userID int, startDate, endDate string) ([]*models.QuranReading, error) {
+	query := `SELECT id, user_id, date, start_surah_id, start_surah_name, start_ayah, end_surah_id, end_surah_name, end_ayah, notes, created_at
+			  FROM quran_readings WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC, created_at DESC`
+
+	rows, err := r.DB.Query(query, userID, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var readings []*models.QuranReading
+	for rows.Next() {
+		reading := &models.QuranReading{}
+		err := rows.Scan(
+			&reading.ID, &reading.UserID, &reading.Date, &reading.StartSurahID, &reading.StartSurahName,
+			&reading.StartAyah, &reading.EndSurahID, &reading.EndSurahName, &reading.EndAyah, &reading.Notes, &reading.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		readings = append(readings, reading)
+	}
+	return readings, nil
+}
+
 func (r *QuranRepository) Delete(id int) error {
 	query := `DELETE FROM quran_readings WHERE id = ?`
 	_, err := r.DB.Exec(query, id)

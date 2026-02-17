@@ -171,6 +171,57 @@ func (r *PrayerRepository) GetTodayStats(date string) (map[string]int, error) {
 	return stats, nil
 }
 
+func (r *PrayerRepository) GetDailyCompletionStats(startDate, endDate string) ([]map[string]interface{}, error) {
+	query := `SELECT date,
+			  COUNT(CASE WHEN subuh IN ('jamaah', 'sendiri') THEN 1 END) as subuh,
+			  COUNT(CASE WHEN dzuhur IN ('jamaah', 'sendiri') THEN 1 END) as dzuhur,
+			  COUNT(CASE WHEN ashar IN ('jamaah', 'sendiri') THEN 1 END) as ashar,
+			  COUNT(CASE WHEN maghrib IN ('jamaah', 'sendiri') THEN 1 END) as maghrib,
+			  COUNT(CASE WHEN isya IN ('jamaah', 'sendiri') THEN 1 END) as isya,
+			  COUNT(DISTINCT user_id) as total_users
+			  FROM prayers 
+			  WHERE date BETWEEN ? AND ?
+			  GROUP BY date
+			  ORDER BY date ASC`
+
+	rows, err := r.DB.Query(query, startDate, endDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []map[string]interface{}
+	for rows.Next() {
+		var date string
+		var subuh, dzuhur, ashar, maghrib, isya, totalUsers int
+		err := rows.Scan(&date, &subuh, &dzuhur, &ashar, &maghrib, &isya, &totalUsers)
+		if err != nil {
+			return nil, err
+		}
+
+		// Calculate percentage (average completion of 5 prayers by all users)
+		// Total possible prayers = totalUsers * 5
+		// Total completed = subuh + dzuhur + ...
+		if totalUsers > 0 {
+			totalCompleted := subuh + dzuhur + ashar + maghrib + isya
+			percentage := float64(totalCompleted) / float64(totalUsers*5) * 100
+			
+			dayStat := map[string]interface{}{
+				"date":       date,
+				"percentage": percentage,
+				"subuh":      subuh,
+				"dzuhur":     dzuhur,
+				"ashar":      ashar,
+				"maghrib":    maghrib,
+				"isya":       isya,
+				"users":      totalUsers,
+			}
+			result = append(result, dayStat)
+		}
+	}
+	return result, nil
+}
+
 func (r *PrayerRepository) GetAllByDate(date string) ([]*models.Prayer, error) {
 	query := `SELECT p.id, p.user_id, p.date, p.subuh, p.dzuhur, p.ashar, p.maghrib, p.isya, p.created_at, p.updated_at,
 			  u.full_name, u.class

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -27,19 +26,39 @@ type Handler struct {
 	MuslimAPI        *services.MuslimAPIService
 	ImsakiyahService *services.ImsakiyahService
 	ShalatService    *services.ShalatService
+	AdminService     *services.AdminService
+	ExportService    *services.ExportService
+	BadgeRepo        *repository.BadgeRepository
+	BadgeService     *services.BadgeService
+	StatisticsService *services.StatisticsService
+	ClassRepo        *repository.ClassRepository
 }
 
 func NewHandler(db *sql.DB) *Handler {
+	userRepo := repository.NewUserRepository(db)
+	prayerRepo := repository.NewPrayerRepository(db)
+	fastingRepo := repository.NewFastingRepository(db)
+	quranRepo := repository.NewQuranRepository(db)
+	amaliahRepo := repository.NewAmaliahRepository(db)
+	badgeRepo := repository.NewBadgeRepository(db)
+	classRepo := repository.NewClassRepository(db)
+
 	return &Handler{
 		DB:               db,
-		UserRepo:         repository.NewUserRepository(db),
-		PrayerRepo:       repository.NewPrayerRepository(db),
-		FastingRepo:      repository.NewFastingRepository(db),
-		QuranRepo:        repository.NewQuranRepository(db),
-		AmaliahRepo:      repository.NewAmaliahRepository(db),
+		UserRepo:         userRepo,
+		PrayerRepo:       prayerRepo,
+		FastingRepo:      fastingRepo,
+		QuranRepo:        quranRepo,
+		AmaliahRepo:      amaliahRepo,
 		MuslimAPI:        services.NewMuslimAPIService(),
 		ImsakiyahService: services.NewImsakiyahService(),
 		ShalatService:    services.NewShalatService(),
+		AdminService:     services.NewAdminService(userRepo),
+		ExportService:    services.NewExportService(userRepo, prayerRepo, fastingRepo, quranRepo, amaliahRepo),
+		BadgeRepo:        badgeRepo,
+		BadgeService:     services.NewBadgeService(badgeRepo, prayerRepo, amaliahRepo, quranRepo),
+		StatisticsService: services.NewStatisticsService(prayerRepo, amaliahRepo, fastingRepo, userRepo),
+		ClassRepo:        classRepo,
 	}
 }
 
@@ -362,6 +381,10 @@ func (h *Handler) UserDashboard(c echo.Context) error {
 		imsakiyahData, _ = h.ImsakiyahService.GetImsakiyah(user.Provinsi, user.Kabkota)
 	}
 
+	// Check and get badges
+	newBadges, _ := h.BadgeService.CheckAndAwardBadges(user.ID)
+	userBadges, _ := h.BadgeRepo.GetUserBadges(user.ID)
+
 	return c.Render(http.StatusOK, "user/dashboard.html", map[string]interface{}{
 		"Title":           "Dashboard",
 		"User":            user,
@@ -374,6 +397,8 @@ func (h *Handler) UserDashboard(c echo.Context) error {
 		"Streak":          streak,
 		"TodaySchedule":   todaySchedule,
 		"ImsakiyahData":   imsakiyahData,
+		"UserBadges":      userBadges,
+		"NewBadges":       newBadges,
 	})
 }
 
@@ -780,6 +805,9 @@ func (h *Handler) AdminDashboard(c echo.Context) error {
 		fastingPercentage = (fastingStats["fasting"] * 100) / totalUsers
 	}
 
+	// Get charts data
+	dashboardStats, _ := h.StatisticsService.GetDashboardStats()
+
 	return c.Render(http.StatusOK, "admin/dashboard.html", map[string]interface{}{
 		"Title":             "Admin Dashboard",
 		"User":              user,
@@ -792,6 +820,7 @@ func (h *Handler) AdminDashboard(c echo.Context) error {
 		"TopUsers":          topUsers,
 		"PrayerPercentage":  prayerPercentage,
 		"FastingPercentage": fastingPercentage,
+		"DashboardStats":    dashboardStats,
 	})
 }
 
@@ -799,11 +828,13 @@ func (h *Handler) ManageUsers(c echo.Context) error {
 	user := c.Get("user").(*models.User)
 
 	users, _ := h.UserRepo.GetAll()
+	classes, _ := h.ClassRepo.GetAll()
 
 	return c.Render(http.StatusOK, "admin/users.html", map[string]interface{}{
 		"Title":   "Kelola Siswa",
 		"User":    user,
 		"Users":   users,
+		"Classes": classes,
 		"Success": c.QueryParam("success"),
 		"Error":   c.QueryParam("error"),
 	})
@@ -882,106 +913,7 @@ func (h *Handler) DownloadUserTemplate(c echo.Context) error {
 	return f.Write(c.Response().Writer)
 }
 
-// Import User dari Excel
-func (h *Handler) ImportUsers(c echo.Context) error {
-	// Get uploaded file
-	file, err := c.FormFile("file")
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/users?error=File tidak ditemukan")
-	}
 
-	// Open file
-	src, err := file.Open()
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/users?error=Gagal membuka file")
-	}
-	defer src.Close()
-
-	// Read Excel file
-	f, err := excelize.OpenReader(src)
-	if err != nil {
-		return c.Redirect(http.StatusSeeOther, "/admin/users?error=File Excel tidak valid")
-	}
-	defer f.Close()
-
-	// Get sheet name
-	sheetName := f.GetSheetName(0)
-	if sheetName == "" {
-		return c.Redirect(http.StatusSeeOther, "/admin/users?error=Sheet tidak ditemukan")
-	}
-
-	// Get all rows
-	rows, err := f.GetRows(sheetName)
-	if err != nil || len(rows) < 2 {
-		return c.Redirect(http.StatusSeeOther, "/admin/users?error=Data tidak valid")
-	}
-
-	// Process each row (skip header)
-	successCount := 0
-	errorCount := 0
-	var errors []string
-
-	for i, row := range rows {
-		if i == 0 { // Skip header
-			continue
-		}
-
-		// Validate row has enough columns
-		if len(row) < 5 {
-			errorCount++
-			errors = append(errors, fmt.Sprintf("Baris %d: Data tidak lengkap", i+1))
-			continue
-		}
-
-		username := strings.TrimSpace(row[0])
-		email := strings.TrimSpace(row[1])
-		password := strings.TrimSpace(row[2])
-		fullName := strings.TrimSpace(row[3])
-		class := strings.TrimSpace(row[4])
-
-		// Validate required fields
-		if username == "" || email == "" || password == "" || fullName == "" {
-			errorCount++
-			errors = append(errors, fmt.Sprintf("Baris %d: Field wajib kosong", i+1))
-			continue
-		}
-
-		// Hash password
-		hashedPassword, err := utils.HashPassword(password)
-		if err != nil {
-			errorCount++
-			errors = append(errors, fmt.Sprintf("Baris %d: Gagal hash password", i+1))
-			continue
-		}
-
-		// Create user
-		user := &models.User{
-			Username:     username,
-			Email:        email,
-			PasswordHash: hashedPassword,
-			FullName:     fullName,
-			Class:        class,
-			Role:         "user",
-			Points:       0,
-		}
-
-		if err := h.UserRepo.Create(user); err != nil {
-			errorCount++
-			errors = append(errors, fmt.Sprintf("Baris %d: %s (mungkin sudah ada)", i+1, username))
-			continue
-		}
-
-		successCount++
-	}
-
-	// Prepare message
-	message := fmt.Sprintf("Berhasil import %d user", successCount)
-	if errorCount > 0 {
-		message += fmt.Sprintf(", %d gagal", errorCount)
-	}
-
-	return c.Redirect(http.StatusSeeOther, "/admin/users?success="+message)
-}
 
 func (h *Handler) ShowReports(c echo.Context) error {
 	user := c.Get("user").(*models.User)
@@ -1034,10 +966,13 @@ func (h *Handler) EditUser(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/admin/users?error=User tidak ditemukan")
 	}
 
+	classes, _ := h.ClassRepo.GetAll()
+
 	return c.Render(http.StatusOK, "admin/user_edit.html", map[string]interface{}{
 		"Title":      "Edit Siswa",
 		"User":       user,
 		"TargetUser": targetUser,
+		"Classes":    classes,
 		"Error":      c.QueryParam("error"),
 		"Success":    c.QueryParam("success"),
 	})

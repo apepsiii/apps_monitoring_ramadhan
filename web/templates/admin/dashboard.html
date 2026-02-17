@@ -65,6 +65,23 @@
                     </svg>
                 </a>
 
+                <a href="/admin/classes" class="flex items-center justify-between p-4 bg-warm-100 rounded-xl hover:bg-primary/10 transition-colors">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-11 h-11 rounded-xl bg-orange-400 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">Kelas & Rombel</h4>
+                            <p class="text-xs text-gray-500">Kelola data kelas</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+
                 <a href="/admin/reports" class="flex items-center justify-between p-4 bg-warm-100 rounded-xl hover:bg-primary/10 transition-colors">
                     <div class="flex items-center space-x-3">
                         <div class="w-11 h-11 rounded-xl gradient-accent flex items-center justify-center">
@@ -100,6 +117,27 @@
                     </svg>
                 </a>
             </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Prayer Chart -->
+            <div class="bg-white rounded-2xl card-shadow p-4">
+                <h3 class="font-semibold text-gray-800 mb-4">Tren Kepatuhan Shalat (7 Hari)</h3>
+                <canvas id="prayerChart"></canvas>
+            </div>
+
+            <!-- Amaliah Chart -->
+            <div class="bg-white rounded-2xl card-shadow p-4">
+                <h3 class="font-semibold text-gray-800 mb-4">Top 5 Amaliah</h3>
+                <canvas id="amaliahChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Leaderboard Chart -->
+        <div class="bg-white rounded-2xl card-shadow p-4">
+            <h3 class="font-semibold text-gray-800 mb-4">Top 10 Siswa (Leaderboard)</h3>
+            <canvas id="leaderboardChart" height="300"></canvas>
         </div>
 
         <div class="bg-white rounded-2xl card-shadow p-4">
@@ -153,6 +191,80 @@
                 </div>
             </div>
         </div>
+
+        <!-- Chart JS -->
+        <script src="/js/chart.min.js"></script>
+        <script>
+            // Data from Backend
+            const prayerLabels = {{.DashboardStats.prayer_labels}};
+            const prayerData = {{.DashboardStats.prayer_data}};
+            const amaliahStats = {{.DashboardStats.amaliah_stats}};
+
+            // Process Amaliah Data
+            const amaliahLabels = amaliahStats ? amaliahStats.map(item => item.name) : [];
+            const amaliahData = amaliahStats ? amaliahStats.map(item => item.count) : [];
+
+            // 1. Prayer Chart (Line)
+            const ctxPrayer = document.getElementById('prayerChart').getContext('2d');
+            new Chart(ctxPrayer, {
+                type: 'line',
+                data: {
+                    labels: prayerLabels,
+                    datasets: [{
+                        label: 'Persentase Kepatuhan (%)',
+                        data: prayerData,
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // 2. Amaliah Chart (Bar)
+            const ctxAmaliah = document.getElementById('amaliahChart').getContext('2d');
+            new Chart(ctxAmaliah, {
+                type: 'bar',
+                data: {
+                    labels: amaliahLabels,
+                    datasets: [{
+                        label: 'Jumlah Partisipasi',
+                        data: amaliahData,
+                        backgroundColor: [
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(139, 92, 246, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        </script>
 
         {{if .TopUsers}}
         <div class="bg-white rounded-2xl card-shadow p-4">

@@ -237,6 +237,37 @@ func (r *AmaliahRepository) GetStatsByType(date string) ([]map[string]interface{
 	return stats, nil
 }
 
+func (r *AmaliahRepository) GetAmaliahDistribution() ([]map[string]interface{}, error) {
+	query := `SELECT 
+			  at.name, COUNT(da.id) as count
+			  FROM daily_amaliah da
+			  JOIN amaliah_types at ON da.amaliah_type_id = at.id
+			  GROUP BY at.id
+			  ORDER BY count DESC
+			  LIMIT 5`
+
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var stats []map[string]interface{}
+	for rows.Next() {
+		var name string
+		var count int
+		err := rows.Scan(&name, &count)
+		if err != nil {
+			return nil, err
+		}
+		stats = append(stats, map[string]interface{}{
+			"name":  name,
+			"count": count,
+		})
+	}
+	return stats, nil
+}
+
 func (r *AmaliahRepository) GetAllByDate(date string) ([]*models.DailyAmaliah, error) {
 	query := `SELECT da.id, da.user_id, da.amaliah_type_id, da.date, da.notes, da.created_at,
 			  at.id, at.name, at.description, at.points, at.icon,

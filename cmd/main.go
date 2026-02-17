@@ -84,6 +84,8 @@ func runApplication() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
+	e.Use(middleware.Secure()) // Security headers (XSS, HSTS, etc)
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20))) // Rate limiting (20 req/s)
 	
 	// Static Files from Embedded FS
 	// Serve each subdirectory separately to match template paths
@@ -185,7 +187,14 @@ func runApplication() {
 	admin.GET("/users/detail/:id", h.ShowUserDetail)
 	admin.GET("/reports", h.ShowReports)
 	admin.GET("/reports/generate", h.GenerateReport)
+	admin.GET("/reports/download", h.DownloadReport)
 	admin.GET("/statistics", h.ShowStatistics)
+
+	// Class Management
+	admin.GET("/classes", h.ManageClasses)
+	admin.POST("/classes", h.CreateClass)
+	admin.POST("/classes/update/:id", h.UpdateClass)
+	admin.GET("/classes/delete/:id", h.DeleteClass)
 
 	// Error Routes
 	e.GET("/403", h.Forbidden)

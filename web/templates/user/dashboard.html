@@ -180,7 +180,7 @@
                         <span class="font-semibold text-primary">{{.PrayerCompleted}}/5</span>
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-2.5">
-                        <div class="bg-gradient-primary h-2.5 rounded-full transition-all duration-500" style="width: {{multiply (divide .PrayerCompleted 5) 100}}%"></div>
+                        <div class="bg-gradient-primary h-2.5 rounded-full transition-all duration-500" style="width: {{multiply (divide .PrayerCompleted 5.0) 100}}%"></div>
                     </div>
                 </div>
 
@@ -202,14 +202,37 @@
                         <span class="font-semibold text-accent">{{.TotalReadings}}x</span>
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-2.5">
-                        <div class="bg-gradient-accent h-2.5 rounded-full transition-all duration-500" style="width: {{if gt .TotalReadings 0}}100{{else}}0{{end}}%"></div>
+                        <div class="bg-gradient-accent h-2.5 rounded-full transition-all duration-500" style="width: {{if gt .TotalReadings 0}}100%{{else}}0%{{end}}"></div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="card-soft">
-            <h3 class="font-semibold text-gray-800 mb-4">Konten Islami</h3>
+            <h3 class="font-semibold text-gray-800 mb-4">Pencapaian Saya</h3>
+            {{if .UserBadges}}
+            <div class="grid grid-cols-4 gap-2">
+                {{range .UserBadges}}
+                <div class="text-center p-2">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-yellow-100 to-amber-100 flex items-center justify-center border-2 border-amber-200">
+                        <span class="text-xl">
+                            {{if eq .Badge.Icon "star"}}⭐{{else if eq .Badge.Icon "fire"}}🔥{{else if eq .Badge.Icon "award"}}🏅{{else if eq .Badge.Icon "book-open"}}📖{{else if eq .Badge.Icon "book"}}📚{{else if eq .Badge.Icon "check-circle"}}✅{{else if eq .Badge.Icon "heart"}}❤️{{else if eq .Badge.Icon "sun"}}☀️{{else if eq .Badge.Icon "trophy"}}🏆{{else}}🏅{{end}}
+                        </span>
+                    </div>
+                    <p class="text-[10px] font-medium text-gray-700 leading-tight">{{.Badge.Name}}</p>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <div class="text-center py-4 bg-gray-50 rounded-xl">
+                <span class="text-2xl grayscale opacity-50">🏆</span>
+                <p class="text-xs text-gray-400 mt-2">Belum ada pencapaian. Terus semangat!</p>
+            </div>
+            {{end}}
+        </div>
+
+        <div class="card-soft">
+            <h3 class="font-semibold text-gray-800 mb-4">Materi Islami</h3>
             <div class="grid grid-cols-4 gap-2">
                 <a href="/user/jadwal" class="text-center p-3 rounded-xl hover:bg-gray-50 transition-colors">
                     <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br from-primary to-teal-500 flex items-center justify-center">

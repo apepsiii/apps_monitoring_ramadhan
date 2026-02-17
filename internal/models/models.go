@@ -140,6 +140,26 @@ type ImsakiyahData struct {
 	Imsakiyah []ImsakiyahSchedule `json:"imsakiyah"`
 }
 
+type Badge struct {
+	ID            int       `json:"id"`
+	Name          string    `json:"name"`
+	Description   string    `json:"description"`
+	Icon          string    `json:"icon"`
+	CriteriaType  string    `json:"criteria_type"` // prayer_streak, quran_khatam, etc
+	CriteriaValue int       `json:"criteria_value"`
+	CreatedAt     time.Time `json:"created_at"`
+	IsEarned      bool      `json:"is_earned,omitempty"` // populated for user response
+	EarnedAt      string    `json:"earned_at,omitempty"`
+}
+
+type UserBadge struct {
+	ID       int       `json:"id"`
+	UserID   int       `json:"user_id"`
+	BadgeID  int       `json:"badge_id"`
+	EarnedAt time.Time `json:"earned_at"`
+	Badge    Badge     `json:"badge"`
+}
+
 type ImsakiyahResponse struct {
 	Code    int           `json:"code"`
 	Message string        `json:"message"`
