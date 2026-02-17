@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"os"
@@ -10,9 +11,28 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/ramadhan/amaliah-monitoring/internal/config"
 	"github.com/ramadhan/amaliah-monitoring/internal/handlers"
+	"github.com/ramadhan/amaliah-monitoring/internal/installer"
 )
 
 func main() {
+	// Parse flags
+	installMode := flag.Bool("install", false, "Run installer wizard")
+	flag.Parse()
+
+	// Run installer if flag is set
+	if *installMode {
+		inst := installer.NewInstaller()
+		if err := inst.Run(); err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+
+	// Normal application mode
+	runApplication()
+}
+
+func runApplication() {
 	// Load .env file
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using system environment variables")
