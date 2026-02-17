@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"strconv"
 	"time"
 
@@ -12,9 +14,10 @@ import (
 // TemplateRenderer struct untuk Echo
 type TemplateRenderer struct {
 	templates *template.Template
+	embedFS   fs.FS
 }
 
-func NewTemplateRenderer() *TemplateRenderer {
+func NewTemplateRenderer(embedFS fs.FS) *TemplateRenderer {
 	// Parse all templates with custom functions
 	funcMap := template.FuncMap{
 		"iterate": func(start, end int) []int {
@@ -54,27 +57,43 @@ func NewTemplateRenderer() *TemplateRenderer {
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
-	tmpl = template.Must(tmpl.ParseGlob("web/templates/layouts/*.html"))
-	tmpl = template.Must(tmpl.ParseGlob("web/templates/*.html"))
-	tmpl = template.Must(tmpl.ParseGlob("web/templates/auth/*.html"))
-	tmpl = template.Must(tmpl.ParseGlob("web/templates/user/*.html"))
-	tmpl = template.Must(tmpl.ParseGlob("web/templates/admin/*.html"))
+	
+	// Parse ONLY layouts and shared components from embedded FS
+	// Specific pages will be parsed in Render()
+	patterns := []string{
+		"templates/layouts/*.html",
+		// "templates/*.html", // Don't parse pages yet to avoid block conflicts
+		// "templates/auth/*.html",
+		// "templates/user/*.html",
+		// "templates/admin/*.html",
+	}
+
+	for _, pattern := range patterns {
+		t, err := tmpl.ParseFS(embedFS, pattern)
+		if err != nil {
+			fmt.Printf("Error parsing pattern %s: %v\n", pattern, err)
+			continue
+		}
+		tmpl = t
+	}
 
 	return &TemplateRenderer{
 		templates: tmpl,
+		embedFS:   embedFS,
 	}
 }
 
 func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	// Clone the template set and parse the specific template file
+	// Clone the template set (which has layouts)
 	tmpl, err := t.templates.Clone()
 	if err != nil {
 		return err
 	}
 
-	// Parse the specific template file
-	filePath := "web/templates/" + name
-	tmpl, err = tmpl.ParseFiles(filePath)
+	// Parse the specific template file from FS
+	filePath := "templates/" + name
+	
+	tmpl, err = tmpl.ParseFS(t.embedFS, filePath)
 	if err != nil {
 		return err
 	}

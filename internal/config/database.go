@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"os"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 var DB *sql.DB
@@ -15,7 +15,7 @@ func InitDB() (*sql.DB, error) {
 		dbName = "./amaliah.db"
 	}
 
-	db, err := sql.Open("sqlite3", dbName)
+	db, err := sql.Open("sqlite", dbName)
 	if err != nil {
 		return nil, err
 	}

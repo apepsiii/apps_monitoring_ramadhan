@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Build script for Amaliah Ramadhan - ARM Binary
-# For Armbian/ARM architecture deployment
+# Build script for Amaliah Ramadhan - Linux AMD64 Binary
+# For Standard Linux Server (x86_64) deployment
 
 set -e
 
 echo "╔══════════════════════════════════════════════════════════╗"
-echo "║     Building Amaliah Ramadhan for ARM Architecture      ║"
+echo "║     Building Amaliah Ramadhan for Linux (AMD64)         ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
 
@@ -25,7 +25,7 @@ DIST_DIR="dist"
 
 # Build configurations
 GOOS="linux"
-GOARCH="arm64"  # Change to arm for 32-bit ARM
+GOARCH="amd64"
 CGO_ENABLED=0
 
 echo "📦 Build Configuration:"
@@ -42,18 +42,23 @@ rm -rf $DIST_DIR
 mkdir -p $BUILD_DIR
 mkdir -p $DIST_DIR
 
-# Step 1: Install Dependencies & Build JS/CSS
-echo "📦 Installing front-end dependencies..."
-npm install
+# Step 0: Build Frontend Assets
+echo "🎨 Building frontend assets..."
+if command -v npm &> /dev/null; then
+    echo "   Running npm install..."
+    npm install
+    echo "   Compiling CSS..."
+    npm run build:css
+else
+    echo -e "${YELLOW}⚠️  npm not found! Skipping frontend build.${NC}"
+    echo -e "${YELLOW}   Ensure web/static/css/output.css exists or install Node.js.${NC}"
+fi
 
-echo "🎨 Building CSS..."
-npm run build:css
-
-# Step 2: Tidy dependencies
+# Step 1: Tidy dependencies
 echo "📚 Tidying Go modules..."
 go mod tidy
 
-# Step 3: Build binary
+# Step 2: Build binary
 echo "🔨 Building binary..."
 GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=$CGO_ENABLED go build \
     -ldflags="-s -w -X main.Version=$VERSION -X main.BuildDate=$DATE" \
@@ -67,42 +72,34 @@ else
     exit 1
 fi
 
-# Step 4: Verify binary
+# Step 3: Verify binary
 ls -lh $BUILD_DIR/$APP_NAME
 
-# Step 5: Move to dist
+# Step 4: Move to dist
 echo "📦 Moving binary to dist..."
 OUTPUT_NAME="${APP_NAME}-${VERSION}-${DATE}-${GOOS}-${GOARCH}"
 cp $BUILD_DIR/$APP_NAME $DIST_DIR/$OUTPUT_NAME
 chmod +x $DIST_DIR/$OUTPUT_NAME
 
-# Step 6: Create README
+# Create README
 cat > $DIST_DIR/README.md << 'EOF'
-# Amaliah Ramadhan - Single Binary Deployment (ARM)
+# Amaliah Ramadhan - Single Binary Deployment
 
-## Installation on Armbian/ARM Linux
+## Installation
 
 1. **Upload** the binary to your server:
    ```bash
-   scp amaliah-ramadhan-*-linux-arm64 user@server:/tmp/
+   scp amaliah-ramadhan-*-linux-amd64 user@server:/tmp/
    ```
 
 2. **Run Installer**:
    ```bash
    ssh user@server
-   chmod +x /tmp/amaliah-ramadhan-*-linux-arm64
-   sudo /tmp/amaliah-ramadhan-*-linux-arm64 -install
+   chmod +x /tmp/amaliah-ramadhan-*-linux-amd64
+   sudo /tmp/amaliah-ramadhan-*-linux-amd64 -install
    ```
 
 3. **Follow the Wizard**.
-   - Choose "1" for New Installation.
-   - The application will handle everything.
-
-### Update Existing Installation
-
-1. Upload the new binary.
-2. Run it with `-install`.
-3. Choose "2" for Update.
 EOF
 
 echo ""
@@ -111,7 +108,3 @@ echo "   Binary: $DIST_DIR/$OUTPUT_NAME"
 echo "   Size:   $(du -h $DIST_DIR/$OUTPUT_NAME | cut -f1)"
 echo ""
 echo "✅ Build completed!"
-echo "🚀 To install:"
-echo "   1. Copy $OUTPUT_NAME to server"
-echo "   2. Run: sudo ./$OUTPUT_NAME -install"
-echo ""

@@ -26,12 +26,16 @@ type Installer struct {
 	Port         string
 	IsNewInstall bool
 	Reader       *bufio.Reader
+	Version      string
+	BuildDate    string
 }
 
-func NewInstaller() *Installer {
+func NewInstaller(version, buildDate string) *Installer {
 	return &Installer{
-		Port:   DefaultPort,
-		Reader: bufio.NewReader(os.Stdin),
+		Port:      DefaultPort,
+		Reader:    bufio.NewReader(os.Stdin),
+		Version:   version,
+		BuildDate: buildDate,
 	}
 }
 
@@ -48,7 +52,8 @@ func (i *Installer) ShowBanner() {
 ╚══════════════════════════════════════════════════════════╝
 `
 	fmt.Println(banner)
-	fmt.Printf("Version: 1.0.0\n")
+	fmt.Printf("Version: %s\n", i.Version)
+	fmt.Printf("Build Date: %s\n", i.BuildDate)
 	fmt.Printf("Platform: %s/%s\n\n", runtime.GOOS, runtime.GOARCH)
 }
 
@@ -205,42 +210,35 @@ func (i *Installer) InstallNew() error {
 		return err
 	}
 
-	// Step 3: Copy static files
-	if err := i.ShowProgress("Menyalin file statis (templates, css, js)", func() error {
-		return i.copyStaticFiles()
-	}); err != nil {
-		return err
-	}
-
-	// Step 4: Create config
+	// Step 3: Create config
 	if err := i.ShowProgress("Membuat file konfigurasi", func() error {
 		return i.createConfig()
 	}); err != nil {
 		return err
 	}
 
-	// Step 5: Setup database
+	// Step 4: Setup database
 	if err := i.ShowProgress("Inisialisasi database", func() error {
 		return i.setupDatabase()
 	}); err != nil {
 		return err
 	}
 
-	// Step 6: Create systemd service
+	// Step 5: Create systemd service
 	if err := i.ShowProgress("Membuat systemd service", func() error {
 		return i.createService()
 	}); err != nil {
 		return err
 	}
 
-	// Step 7: Set permissions
+	// Step 6: Set permissions
 	if err := i.ShowProgress("Mengatur hak akses file", func() error {
 		return i.setPermissions()
 	}); err != nil {
 		return err
 	}
 
-	// Step 8: Enable and start service
+	// Step 7: Enable and start service
 	if err := i.ShowProgress("Mengaktifkan dan memulai service", func() error {
 		return i.enableAndStartService()
 	}); err != nil {
@@ -432,14 +430,7 @@ func (i *Installer) Update() error {
 		return err
 	}
 
-	// Step 4: Update static files
-	if err := i.ShowProgress("Update file statis", func() error {
-		return i.copyStaticFiles()
-	}); err != nil {
-		return err
-	}
-
-	// Step 5: Start service
+	// Step 4: Start service
 	if err := i.ShowProgress("Memulai service kembali", func() error {
 		cmd := exec.Command("systemctl", "start", ServiceName)
 		return cmd.Run()

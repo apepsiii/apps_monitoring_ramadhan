@@ -16,6 +16,9 @@ cd apps_monitoring_ramadhan
 # Build untuk ARM64 (64-bit)
 ./build-arm.sh
 
+# Build untuk Linux Server (AMD64)
+./build-linux.sh
+
 # Untuk ARM 32-bit, edit build-arm.sh:
 # Ubah GOARCH="arm64" menjadi GOARCH="arm"
 ```
@@ -26,8 +29,10 @@ Setelah build selesai, Anda akan mendapatkan:
 
 ```
 dist/
-├── amaliah-ramadhan-installer-linux-arm64  # Single binary installer
-├── amaliah-ramadhan-1.0.0-linux-arm64.tar.gz  # Package lengkap
+├── amaliah-ramadhan-installer-linux-arm64  # Single binary installer (ARM)
+├── amaliah-ramadhan-installer-linux-amd64  # Single binary installer (Linux/AMD64)
+├── amaliah-ramadhan-1.0.0-linux-arm64.tar.gz  # Package lengkap (ARM)
+├── amaliah-ramadhan-1.0.0-linux-amd64.tar.gz  # Package lengkap (Linux/AMD64)
 └── README.md  # Dokumentasi deployment
 ```
 
@@ -37,9 +42,9 @@ dist/
 
 ### Metode 1: Installer Wizard (Recommended)
 
-1. **Transfer installer ke server:**
+1. **Transfer package ke server:**
    ```bash
-   scp dist/amaliah-ramadhan-installer-linux-arm64 user@192.168.1.100:/tmp/
+   scp dist/amaliah-ramadhan-*.tar.gz user@192.168.1.100:/tmp/
    ```
 
 2. **SSH ke server:**
@@ -47,11 +52,20 @@ dist/
    ssh user@192.168.1.100
    ```
 
-3. **Jalankan installer:**
+3. **Ekstrak dan Jalankan Installer:**
    ```bash
    cd /tmp
-   chmod +x amaliah-ramadhan-installer-linux-arm64
-   sudo ./amaliah-ramadhan-installer-linux-arm64 -install
+   # Ekstrak package (sangat penting agar folder 'web' terbawa)
+   tar -xzf amaliah-ramadhan-*.tar.gz
+   
+   # Masuk ke folder hasil ekstrak
+   cd amaliah-ramadhan
+   
+   # Beri izin eksekusi
+   chmod +x amaliah-ramadhan-installer-linux-*
+   
+   # Jalankan installer
+   sudo ./amaliah-ramadhan-installer-linux-* -install
    ```
 
 4. **Wizard akan menampilkan menu:**

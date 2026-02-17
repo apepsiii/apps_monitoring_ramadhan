@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -9,9 +10,15 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/ramadhan/amaliah-monitoring"
 	"github.com/ramadhan/amaliah-monitoring/internal/config"
 	"github.com/ramadhan/amaliah-monitoring/internal/handlers"
 	"github.com/ramadhan/amaliah-monitoring/internal/installer"
+)
+
+var (
+	Version   = "1.0.0"
+	BuildDate = "Unknown"
 )
 
 func main() {
@@ -21,7 +28,7 @@ func main() {
 
 	// Run installer if flag is set
 	if *installMode {
-		inst := installer.NewInstaller()
+		inst := installer.NewInstaller(Version, BuildDate)
 		if err := inst.Run(); err != nil {
 			os.Exit(1)
 		}
@@ -41,8 +48,16 @@ func runApplication() {
 	// Initialize Echo
 	e := echo.New()
 
-	// Setup Template Renderer
-	e.Renderer = config.NewTemplateRenderer()
+	// Get subtree of web
+	// Access WebFS from the root package (aliased or as package name)
+	// The package name in embed.go is "amaliah"
+	webFS, err := fs.Sub(amaliah.WebFS, "web")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Setup Template Renderer with embedded FS
+	e.Renderer = config.NewTemplateRenderer(webFS)
 
 	// Custom HTTP Error Handler
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
@@ -69,7 +84,20 @@ func runApplication() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
-	e.Use(middleware.Static("web/static"))
+	
+	// Static Files from Embedded FS
+	// Serve each subdirectory separately to match template paths
+	cssFS, _ := fs.Sub(webFS, "static/css")
+	e.StaticFS("/css", cssFS)
+	
+	imagesFS, _ := fs.Sub(webFS, "static/images")
+	e.StaticFS("/images", imagesFS)
+	
+	fontsFS, _ := fs.Sub(webFS, "static/fonts")
+	e.StaticFS("/fonts", fontsFS)
+	
+	jsFS, _ := fs.Sub(webFS, "static/js")
+	e.StaticFS("/js", jsFS)
 
 	// Initialize Database
 	db, err := config.InitDB()
@@ -89,9 +117,21 @@ func runApplication() {
 	// Routes
 	e.GET("/", h.Home)
 
-	// PWA Routes
-	e.File("/manifest.json", "web/static/manifest.json")
-	e.File("/sw.js", "web/static/sw.js")
+	// PWA Routes - serve from embedded FS
+	e.GET("/manifest.json", func(c echo.Context) error {
+		data, err := fs.ReadFile(webFS, "static/manifest.json")
+		if err != nil {
+			return c.String(http.StatusNotFound, "Not found")
+		}
+		return c.Blob(http.StatusOK, "application/json", data)
+	})
+	e.GET("/sw.js", func(c echo.Context) error {
+		data, err := fs.ReadFile(webFS, "static/sw.js")
+		if err != nil {
+			return c.String(http.StatusNotFound, "Not found")
+		}
+		return c.Blob(http.StatusOK, "application/javascript", data)
+	})
 
 	// Public Routes - Jadwal Shalat & Imsakiyah
 	e.GET("/jadwal", h.ShowJadwal)
