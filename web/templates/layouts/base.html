@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#10B981">
+    <meta name="theme-color" content="#0D7E5E">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{{.Title}} - Amaliah Ramadhan</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/output.css">
+    
     <style>
         * {
             -webkit-tap-highlight-color: transparent;
@@ -16,8 +20,13 @@
         }
         
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
             overscroll-behavior: none;
+            background-color: #F8F7F4;
+        }
+        
+        .font-arabic {
+            font-family: 'Amiri', serif;
         }
         
         .fade-in {
@@ -38,7 +47,33 @@
             to { transform: translateY(0); }
         }
         
-        /* Hide scrollbar but keep functionality */
+        .scale-in {
+            animation: scaleIn 0.2s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .pulse-soft {
+            animation: pulseSoft 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseSoft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
         .hide-scrollbar {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -47,22 +82,51 @@
             display: none;
         }
         
-        /* Safe area support */
         .safe-top {
             padding-top: env(safe-area-inset-top);
         }
         .safe-bottom {
             padding-bottom: env(safe-area-inset-bottom);
         }
+        
+        .gradient-primary {
+            background: linear-gradient(135deg, #0D7E5E 0%, #0A6349 100%);
+        }
+        
+        .gradient-accent {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%);
+        }
+        
+        .gradient-header {
+            background: linear-gradient(180deg, #0D7E5E 0%, #0A6349 100%);
+        }
+        
+        .islamic-pattern {
+            background-color: #0D7E5E;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .card-shadow {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-shadow-lg {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-md mx-auto bg-gray-50 min-h-screen relative">
+<body class="bg-warm-50 min-h-screen">
+    <div class="max-w-md mx-auto bg-warm-50 min-h-screen relative">
         {{template "content" .}}
     </div>
     
     <script>
-        // Prevent zoom on double tap
         let lastTouchEnd = 0;
         document.addEventListener('touchend', function(event) {
             const now = Date.now();
@@ -71,6 +135,10 @@
             }
             lastTouchEnd = now;
         }, false);
+        
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
     </script>
 </body>
 </html>

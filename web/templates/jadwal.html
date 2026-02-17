@@ -1,0 +1,346 @@
+{{define "content"}}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0D7E5E">
+    <title>{{.Title}} - Amaliah Ramadhan</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/output.css">
+    
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #F8F7F4;
+        }
+        .font-arabic { font-family: 'Amiri', serif; }
+        .gradient-primary { background: linear-gradient(135deg, #0D7E5E 0%, #0A6349 100%); }
+        .gradient-accent { background: linear-gradient(135deg, #D4AF37 0%, #B8941F 100%); }
+        .card-shadow { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .safe-top { padding-top: env(safe-area-inset-top); }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .time-card { transition: all 0.2s ease; }
+        .time-card:hover { transform: translateY(-2px); }
+        .time-card.active { background: linear-gradient(135deg, #0D7E5E 0%, #0A6349 100%); color: white; }
+        .time-card.active p { color: rgba(255,255,255,0.8); }
+        .tab-btn { transition: all 0.2s ease; }
+        .tab-btn.active { background: linear-gradient(135deg, #0D7E5E 0%, #0A6349 100%); color: white; }
+    </style>
+</head>
+<body class="bg-warm-50 min-h-screen">
+    <div class="max-w-md mx-auto bg-warm-50 min-h-screen relative">
+        <header class="gradient-primary text-white safe-top sticky top-0 z-10">
+            <div class="px-4 py-4">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 class="text-xl font-bold">Jadwal Shalat</h1>
+                        <p class="text-white/80 text-sm">dan Imsakiyah Ramadhan</p>
+                    </div>
+                    {{if .User}}
+                    <a href="/user/dashboard" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                    </a>
+                    {{else}}
+                    <a href="/login" class="px-4 py-2 bg-white/20 rounded-full text-sm font-medium hover:bg-white/30 transition-colors">
+                        Masuk
+                    </a>
+                    {{end}}
+                </div>
+            </div>
+        </header>
+
+        <main class="px-4 py-4 space-y-4 fade-in">
+            <div class="bg-white rounded-2xl card-shadow p-4">
+                <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                    <span class="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center mr-2">
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                    </span>
+                    Pilih Lokasi
+                </h3>
+                
+                <form action="/jadwal" method="GET" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Provinsi</label>
+                        <select name="provinsi" id="provinsi" onchange="loadKabkota(this.value)" 
+                            class="w-full px-4 py-3 bg-warm-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            <option value="">Pilih Provinsi</option>
+                            {{range .ProvinsiList}}
+                            <option value="{{.}}" {{if eq $.Provinsi .}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kabupaten/Kota</label>
+                        <select name="kabkota" id="kabkota" 
+                            class="w-full px-4 py-3 bg-warm-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            <option value="">Pilih Kabupaten/Kota</option>
+                            {{range .KabkotaList}}
+                            <option value="{{.}}" {{if eq $.Kabkota .}}selected{{end}}>{{.}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 gradient-primary text-white rounded-xl font-medium">
+                        Lihat Jadwal
+                    </button>
+                </form>
+            </div>
+
+            {{if and .Provinsi .Kabkota}}
+            {{if or .TodayShalat .TodayImsakiyah}}
+            <div class="bg-white rounded-2xl card-shadow overflow-hidden">
+                <div class="flex border-b border-gray-100">
+                    <a href="/jadwal?provinsi={{.Provinsi}}&kabkota={{.Kabkota}}&tab=shalat" 
+                       class="flex-1 py-3 text-center text-sm font-medium tab-btn {{if eq .Tab `shalat`}}active{{else}}text-gray-600{{end}}">
+                        <span class="mr-1">🕌</span> Jadwal Shalat
+                    </a>
+                    <a href="/jadwal?provinsi={{.Provinsi}}&kabkota={{.Kabkota}}&tab=imsakiyah" 
+                       class="flex-1 py-3 text-center text-sm font-medium tab-btn {{if eq .Tab `imsakiyah`}}active{{else}}text-gray-600{{end}}">
+                        <span class="mr-1">🌙</span> Imsakiyah
+                    </a>
+                </div>
+
+                <div class="p-4">
+                    {{if eq .Tab "shalat"}}
+                    {{if .TodayShalat}}
+                    <div class="text-center mb-4">
+                        <p class="text-gray-500 text-sm">{{.Kabkota}}, {{.Provinsi}}</p>
+                        <p class="text-lg font-bold text-gray-800">{{.TodayShalat.Hari}}, {{.TodayShalat.TanggalLengkap}}</p>
+                        <p class="text-primary text-sm font-medium">{{.ShalatData.BulanNama}} {{.ShalatData.Tahun}}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Imsak</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayShalat.Imsak}}</p>
+                        </div>
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Subuh</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayShalat.Subuh}}</p>
+                        </div>
+                        <div class="time-card bg-gray-50 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Terbit</p>
+                            <p class="text-xl font-bold text-gray-700">{{.TodayShalat.Terbit}}</p>
+                        </div>
+                        <div class="time-card bg-gray-50 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Dhuha</p>
+                            <p class="text-xl font-bold text-gray-700">{{.TodayShalat.Dhuha}}</p>
+                        </div>
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Dzuhur</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayShalat.Dzuhur}}</p>
+                        </div>
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Ashar</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayShalat.Ashar}}</p>
+                        </div>
+                        <div class="time-card bg-accent/10 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Maghrib</p>
+                            <p class="text-xl font-bold text-accent">{{.TodayShalat.Maghrib}}</p>
+                        </div>
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Isya</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayShalat.Isya}}</p>
+                        </div>
+                    </div>
+                    {{end}}
+
+                    {{if .ShalatData}}
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-gray-800 mb-3">Jadwal Bulan Ini</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-primary/5">
+                                        <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 rounded-l-lg">Tgl</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Imsak</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Subuh</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Dzuhur</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Ashar</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Maghrib</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 rounded-r-lg">Isya</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $s := .ShalatData.Jadwal}}
+                                    <tr class="border-b border-gray-50">
+                                        <td class="px-2 py-2 font-medium">{{$s.Tanggal}}</td>
+                                        <td class="px-2 py-2 text-center text-gray-600">{{$s.Imsak}}</td>
+                                        <td class="px-2 py-2 text-center text-primary font-medium">{{$s.Subuh}}</td>
+                                        <td class="px-2 py-2 text-center text-primary font-medium">{{$s.Dzuhur}}</td>
+                                        <td class="px-2 py-2 text-center text-primary font-medium">{{$s.Ashar}}</td>
+                                        <td class="px-2 py-2 text-center text-accent font-medium">{{$s.Maghrib}}</td>
+                                        <td class="px-2 py-2 text-center text-primary font-medium">{{$s.Isya}}</td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {{end}}
+
+                    {{else if eq .Tab "imsakiyah"}}
+                    {{if .TodayImsakiyah}}
+                    <div class="text-center mb-4">
+                        <p class="text-gray-500 text-sm">{{.Kabkota}}, {{.Provinsi}}</p>
+                        <p class="text-lg font-bold text-gray-800">Ramadhan Hari ke-{{.TodayImsakiyah.Tanggal}}</p>
+                        <p class="text-primary text-sm font-medium">{{.ImsakiyahData.Hijriah}}H / {{.ImsakiyahData.Masehi}}M</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="time-card bg-accent/10 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Imsak</p>
+                            <p class="text-xl font-bold text-accent">{{.TodayImsakiyah.Imsak}}</p>
+                        </div>
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Subuh</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayImsakiyah.Subuh}}</p>
+                        </div>
+                        <div class="time-card bg-gray-50 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Terbit</p>
+                            <p class="text-xl font-bold text-gray-700">{{.TodayImsakiyah.Terbit}}</p>
+                        </div>
+                        <div class="time-card bg-gray-50 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Dhuha</p>
+                            <p class="text-xl font-bold text-gray-700">{{.TodayImsakiyah.Dhuha}}</p>
+                        </div>
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Dzuhur</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayImsakiyah.Dzuhur}}</p>
+                        </div>
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Ashar</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayImsakiyah.Ashar}}</p>
+                        </div>
+                        <div class="time-card bg-accent/10 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Maghrib</p>
+                            <p class="text-xl font-bold text-accent">{{.TodayImsakiyah.Maghrib}}</p>
+                        </div>
+                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
+                            <p class="text-xs text-gray-500 mb-1">Isya</p>
+                            <p class="text-xl font-bold text-primary">{{.TodayImsakiyah.Isya}}</p>
+                        </div>
+                    </div>
+                    {{end}}
+
+                    {{if .ImsakiyahData}}
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-gray-800 mb-3">Jadwal 30 Hari Ramadhan</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-accent/10">
+                                        <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 rounded-l-lg">Hari</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Imsak</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Subuh</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Maghrib</th>
+                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 rounded-r-lg">Isya</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range .ImsakiyahData.Imsakiyah}}
+                                    <tr class="border-b border-gray-50">
+                                        <td class="px-2 py-2 font-medium">{{.Tanggal}}</td>
+                                        <td class="px-2 py-2 text-center text-accent font-medium">{{.Imsak}}</td>
+                                        <td class="px-2 py-2 text-center text-primary font-medium">{{.Subuh}}</td>
+                                        <td class="px-2 py-2 text-center text-accent font-medium">{{.Maghrib}}</td>
+                                        <td class="px-2 py-2 text-center text-primary font-medium">{{.Isya}}</td>
+                                    </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {{end}}
+                    {{end}}
+                </div>
+            </div>
+            {{else}}
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+                <p class="text-amber-700">Gagal memuat jadwal. Pastikan lokasi yang dipilih valid.</p>
+            </div>
+            {{end}}
+            {{end}}
+
+            {{if not .User}}
+            <div class="bg-gradient-to-r from-primary to-teal-600 rounded-2xl p-6 text-white text-center">
+                <h3 class="text-lg font-bold mb-2">Mulai Tracking Ibadahmu!</h3>
+                <p class="text-white/80 text-sm mb-4">Daftar sekarang untuk mencatat shalat, puasa, tilawah, dan amaliah selama Ramadhan.</p>
+                <a href="/register" class="inline-block px-6 py-3 bg-white text-primary rounded-xl font-medium hover:bg-gray-100 transition-colors">
+                    Daftar Sekarang
+                </a>
+            </div>
+            {{end}}
+        </main>
+
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-20" style="padding-bottom: env(safe-area-inset-bottom);">
+            <div class="max-w-md mx-auto flex justify-around py-2">
+                <a href="/" class="flex flex-col items-center text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span class="text-xs mt-1">Home</span>
+                </a>
+                <a href="/jadwal" class="flex flex-col items-center text-primary">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                    </svg>
+                    <span class="text-xs mt-1 font-semibold">Jadwal</span>
+                </a>
+                {{if .User}}
+                <a href="/user/dashboard" class="flex flex-col items-center text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span class="text-xs mt-1">Profil</span>
+                </a>
+                {{else}}
+                <a href="/login" class="flex flex-col items-center text-gray-400 hover:text-primary">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                    </svg>
+                    <span class="text-xs mt-1">Masuk</span>
+                </a>
+                {{end}}
+            </div>
+        </nav>
+    </div>
+
+    <script>
+    function loadKabkota(provinsi) {
+        if (!provinsi) {
+            document.getElementById('kabkota').innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+            return;
+        }
+        
+        fetch('/api/kabkota?provinsi=' + encodeURIComponent(provinsi))
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('kabkota');
+                select.innerHTML = '<option value="">Pilih Kabupaten/Kota</option>';
+                if (data.kabkota) {
+                    data.kabkota.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item;
+                        option.textContent = item;
+                        select.appendChild(option);
+                    });
+                }
+            })
+            .catch(err => console.error('Error:', err));
+    }
+    </script>
+</body>
+</div>
+{{end}}

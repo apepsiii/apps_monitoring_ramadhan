@@ -47,6 +47,10 @@ func main() {
 	// Routes
 	e.GET("/", h.Home)
 
+	// Public Routes - Jadwal Shalat & Imsakiyah
+	e.GET("/jadwal", h.ShowJadwal)
+	e.GET("/api/kabkota", h.GetKabkotaAPI)
+
 	// Auth Routes
 	e.GET("/login", h.ShowLogin)
 	e.POST("/login", h.Login)
@@ -78,13 +82,23 @@ func main() {
 	user.POST("/profile", h.UpdateProfile)
 	user.POST("/profile/change-password", h.ChangePassword)
 
+	// API Routes (protected)
+	user.GET("/api/kabkota", h.GetKabkotaAPI)
+	user.GET("/api/imsakiyah", h.GetImsakiyahAPI)
+
 	// Admin Routes Group
 	admin := e.Group("/admin")
 	admin.Use(h.AdminMiddleware)
 	admin.GET("/dashboard", h.AdminDashboard)
 	admin.GET("/users", h.ManageUsers)
 	admin.POST("/users", h.CreateUser)
+	admin.GET("/users/search", h.SearchUsers)
+	admin.GET("/users/edit/:id", h.EditUser)
+	admin.POST("/users/update/:id", h.UpdateUser)
+	admin.GET("/users/delete/:id", h.DeleteUser)
+	admin.GET("/users/detail/:id", h.ShowUserDetail)
 	admin.GET("/reports", h.ShowReports)
+	admin.GET("/reports/generate", h.GenerateReport)
 	admin.GET("/statistics", h.ShowStatistics)
 
 	// Start Server

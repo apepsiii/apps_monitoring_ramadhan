@@ -15,6 +15,8 @@ type User struct {
 	Bio          string    `json:"bio"`
 	Theme        string    `json:"theme"`
 	TargetKhatam int       `json:"target_khatam"`
+	Provinsi     string    `json:"provinsi"`
+	Kabkota      string    `json:"kabkota"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -27,6 +29,8 @@ type ProfileUpdateRequest struct {
 	Avatar       string `json:"avatar" form:"avatar"`
 	Theme        string `json:"theme" form:"theme"`
 	TargetKhatam int    `json:"target_khatam" form:"target_khatam"`
+	Provinsi     string `json:"provinsi" form:"provinsi"`
+	Kabkota      string `json:"kabkota" form:"kabkota"`
 }
 
 type ChangePasswordRequest struct {
@@ -102,4 +106,83 @@ type RegisterRequest struct {
 	Password string `json:"password" form:"password"`
 	FullName string `json:"full_name" form:"full_name"`
 	Class    string `json:"class" form:"class"`
+}
+
+type Streak struct {
+	UserID        int `json:"user_id"`
+	PrayerStreak  int `json:"prayer_streak"`
+	FastingStreak int `json:"fasting_streak"`
+	QuranStreak   int `json:"quran_streak"`
+	BestPrayer    int `json:"best_prayer"`
+	BestFasting   int `json:"best_fasting"`
+	BestQuran     int `json:"best_quran"`
+	AmaliahStreak int `json:"amaliah_streak"`
+	BestAmaliah   int `json:"best_amaliah"`
+}
+
+type ImsakiyahSchedule struct {
+	Tanggal int    `json:"tanggal"`
+	Imsak   string `json:"imsak"`
+	Subuh   string `json:"subuh"`
+	Terbit  string `json:"terbit"`
+	Dhuha   string `json:"dhuha"`
+	Dzuhur  string `json:"dzuhur"`
+	Ashar   string `json:"ashar"`
+	Maghrib string `json:"maghrib"`
+	Isya    string `json:"isya"`
+}
+
+type ImsakiyahData struct {
+	Provinsi  string              `json:"provinsi"`
+	Kabkota   string              `json:"kabkota"`
+	Hijriah   string              `json:"hijriah"`
+	Masehi    string              `json:"masehi"`
+	Imsakiyah []ImsakiyahSchedule `json:"imsakiyah"`
+}
+
+type ImsakiyahResponse struct {
+	Code    int           `json:"code"`
+	Message string        `json:"message"`
+	Data    ImsakiyahData `json:"data"`
+}
+
+type ShalatSchedule struct {
+	Tanggal        int    `json:"tanggal"`
+	TanggalLengkap string `json:"tanggal_lengkap"`
+	Hari           string `json:"hari"`
+	Imsak          string `json:"imsak"`
+	Subuh          string `json:"subuh"`
+	Terbit         string `json:"terbit"`
+	Dhuha          string `json:"dhuha"`
+	Dzuhur         string `json:"dzuhur"`
+	Ashar          string `json:"ashar"`
+	Maghrib        string `json:"maghrib"`
+	Isya           string `json:"isya"`
+}
+
+type ShalatData struct {
+	Provinsi  string           `json:"provinsi"`
+	Kabkota   string           `json:"kabkota"`
+	Bulan     int              `json:"bulan"`
+	Tahun     int              `json:"tahun"`
+	BulanNama string           `json:"bulan_nama"`
+	Jadwal    []ShalatSchedule `json:"jadwal"`
+}
+
+type ShalatResponse struct {
+	Code    int        `json:"code"`
+	Message string     `json:"message"`
+	Data    ShalatData `json:"data"`
+}
+
+type ProvinsiResponse struct {
+	Code    int      `json:"code"`
+	Message string   `json:"message"`
+	Data    []string `json:"data"`
+}
+
+type KabkotaResponse struct {
+	Code    int      `json:"code"`
+	Message string   `json:"message"`
+	Data    []string `json:"data"`
 }

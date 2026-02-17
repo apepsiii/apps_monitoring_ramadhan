@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,24 +16,28 @@ import (
 )
 
 type Handler struct {
-	DB          *sql.DB
-	UserRepo    *repository.UserRepository
-	PrayerRepo  *repository.PrayerRepository
-	FastingRepo *repository.FastingRepository
-	QuranRepo   *repository.QuranRepository
-	AmaliahRepo *repository.AmaliahRepository
-	MuslimAPI   *services.MuslimAPIService
+	DB               *sql.DB
+	UserRepo         *repository.UserRepository
+	PrayerRepo       *repository.PrayerRepository
+	FastingRepo      *repository.FastingRepository
+	QuranRepo        *repository.QuranRepository
+	AmaliahRepo      *repository.AmaliahRepository
+	MuslimAPI        *services.MuslimAPIService
+	ImsakiyahService *services.ImsakiyahService
+	ShalatService    *services.ShalatService
 }
 
 func NewHandler(db *sql.DB) *Handler {
 	return &Handler{
-		DB:          db,
-		UserRepo:    repository.NewUserRepository(db),
-		PrayerRepo:  repository.NewPrayerRepository(db),
-		FastingRepo: repository.NewFastingRepository(db),
-		QuranRepo:   repository.NewQuranRepository(db),
-		AmaliahRepo: repository.NewAmaliahRepository(db),
-		MuslimAPI:   services.NewMuslimAPIService(),
+		DB:               db,
+		UserRepo:         repository.NewUserRepository(db),
+		PrayerRepo:       repository.NewPrayerRepository(db),
+		FastingRepo:      repository.NewFastingRepository(db),
+		QuranRepo:        repository.NewQuranRepository(db),
+		AmaliahRepo:      repository.NewAmaliahRepository(db),
+		MuslimAPI:        services.NewMuslimAPIService(),
+		ImsakiyahService: services.NewImsakiyahService(),
+		ShalatService:    services.NewShalatService(),
 	}
 }
 
@@ -41,6 +46,74 @@ func (h *Handler) Home(c echo.Context) error {
 	return c.Render(http.StatusOK, "home.html", map[string]interface{}{
 		"Title": "Selamat Datang",
 	})
+}
+
+// Jadwal Shalat & Imsakiyah - Public Page
+func (h *Handler) ShowJadwal(c echo.Context) error {
+	provinsi := c.QueryParam("provinsi")
+	kabkota := c.QueryParam("kabkota")
+	tab := c.QueryParam("tab")
+	if tab == "" {
+		tab = "shalat"
+	}
+
+	provinsiList, _ := h.ShalatService.GetProvinsi()
+
+	var kabkotaList []string
+	if provinsi != "" {
+		kabkotaList, _ = h.ShalatService.GetKabkota(provinsi)
+	}
+
+	var shalatData *models.ShalatData
+	var imsakiyahData *models.ImsakiyahData
+	var todayShalat *models.ShalatSchedule
+	var todayImsakiyah *models.ImsakiyahSchedule
+
+	if provinsi != "" && kabkota != "" {
+		now := time.Now()
+		shalatData, _ = h.ShalatService.GetShalat(provinsi, kabkota, int(now.Month()), now.Year())
+		imsakiyahData, _ = h.ImsakiyahService.GetImsakiyah(provinsi, kabkota)
+
+		if shalatData != nil {
+			dayOfMonth := now.Day()
+			for _, s := range shalatData.Jadwal {
+				if s.Tanggal == dayOfMonth {
+					todayShalat = &s
+					break
+				}
+			}
+		}
+
+		if imsakiyahData != nil {
+			dayOfMonth := now.Day()
+			for _, s := range imsakiyahData.Imsakiyah {
+				if s.Tanggal == dayOfMonth {
+					todayImsakiyah = &s
+					break
+				}
+			}
+		}
+	}
+
+	data := map[string]interface{}{
+		"Title":          "Jadwal Shalat & Imsakiyah",
+		"Provinsi":       provinsi,
+		"Kabkota":        kabkota,
+		"ProvinsiList":   provinsiList,
+		"KabkotaList":    kabkotaList,
+		"Tab":            tab,
+		"ShalatData":     shalatData,
+		"ImsakiyahData":  imsakiyahData,
+		"TodayShalat":    todayShalat,
+		"TodayImsakiyah": todayImsakiyah,
+	}
+
+	user := c.Get("user")
+	if user != nil {
+		data["User"] = user
+	}
+
+	return c.Render(http.StatusOK, "jadwal.html", data)
 }
 
 // Auth Handlers
@@ -156,11 +229,9 @@ func (h *Handler) Logout(c echo.Context) error {
 func (h *Handler) UserDashboard(c echo.Context) error {
 	user := c.Get("user").(*models.User)
 
-	// Get today's prayer
 	today := time.Now().Format("2006-01-02")
 	prayer, _ := h.PrayerRepo.GetByUserAndDate(user.ID, today)
 
-	// Calculate completed prayers
 	prayerCompleted := 0
 	if prayer != nil {
 		if prayer.Subuh == "jamaah" || prayer.Subuh == "sendiri" {
@@ -180,18 +251,39 @@ func (h *Handler) UserDashboard(c echo.Context) error {
 		}
 	}
 
-	// Get today's fasting
 	fasting, _ := h.FastingRepo.GetTodayFasting(user.ID)
 
-	// Get today's amaliah count
 	todayAmaliah, _ := h.AmaliahRepo.GetDailyAmaliah(user.ID, today)
 	todayCompleted := len(todayAmaliah)
 
-	// Get today's points
 	todayPoints, _ := h.AmaliahRepo.GetTodayPoints(user.ID)
 
-	// Get total quran readings
 	totalReadings, _ := h.QuranRepo.GetTotalReadings(user.ID)
+
+	prayerStreak, bestPrayer, _ := h.PrayerRepo.GetPrayerStreak(user.ID)
+	fastingStreak, bestFasting, _ := h.FastingRepo.GetFastingStreak(user.ID)
+	quranStreak, bestQuran, _ := h.QuranRepo.GetQuranStreak(user.ID)
+	amaliahStreak, bestAmaliah, _ := h.AmaliahRepo.GetAmaliahStreak(user.ID)
+
+	streak := &models.Streak{
+		UserID:        user.ID,
+		PrayerStreak:  prayerStreak,
+		FastingStreak: fastingStreak,
+		QuranStreak:   quranStreak,
+		BestPrayer:    bestPrayer,
+		BestFasting:   bestFasting,
+		BestQuran:     bestQuran,
+		AmaliahStreak: amaliahStreak,
+		BestAmaliah:   bestAmaliah,
+	}
+
+	var todaySchedule *models.ImsakiyahSchedule
+	var imsakiyahData *models.ImsakiyahData
+	if user.Provinsi != "" && user.Kabkota != "" {
+		dayOfMonth := time.Now().Day()
+		todaySchedule, _ = h.ImsakiyahService.GetTodaySchedule(user.Provinsi, user.Kabkota, dayOfMonth)
+		imsakiyahData, _ = h.ImsakiyahService.GetImsakiyah(user.Provinsi, user.Kabkota)
+	}
 
 	return c.Render(http.StatusOK, "user/dashboard.html", map[string]interface{}{
 		"Title":           "Dashboard",
@@ -202,6 +294,9 @@ func (h *Handler) UserDashboard(c echo.Context) error {
 		"TodayPoints":     todayPoints,
 		"TodayCompleted":  todayCompleted,
 		"TotalReadings":   totalReadings,
+		"Streak":          streak,
+		"TodaySchedule":   todaySchedule,
+		"ImsakiyahData":   imsakiyahData,
 	})
 }
 
@@ -586,13 +681,40 @@ func (h *Handler) SaveAmaliah(c echo.Context) error {
 func (h *Handler) AdminDashboard(c echo.Context) error {
 	user := c.Get("user").(*models.User)
 
-	// Get stats
-	users, _ := h.UserRepo.GetAll()
+	// Get real stats from database
+	userStats, _ := h.UserRepo.GetStats()
+	today := time.Now().Format("2006-01-02")
+	activeUsers, _ := h.UserRepo.GetActiveUsersCount(today)
+
+	// Get today's activity stats
+	prayerStats, _ := h.PrayerRepo.GetTodayStats(today)
+	fastingStats, _ := h.FastingRepo.GetTodayStats(today)
+	quranStats, _ := h.QuranRepo.GetTodayStats(today)
+	amaliahStats, _ := h.AmaliahRepo.GetTodayStats(today)
+
+	// Get top users
+	topUsers, _ := h.AmaliahRepo.GetLeaderboard(5)
+
+	// Calculate percentages
+	totalUsers := userStats["user_count"].(int)
+	var prayerPercentage, fastingPercentage int
+	if totalUsers > 0 {
+		prayerPercentage = (prayerStats["total_users"] * 100) / totalUsers
+		fastingPercentage = (fastingStats["fasting"] * 100) / totalUsers
+	}
 
 	return c.Render(http.StatusOK, "admin/dashboard.html", map[string]interface{}{
-		"Title":     "Admin Dashboard",
-		"User":      user,
-		"UserCount": len(users),
+		"Title":             "Admin Dashboard",
+		"User":              user,
+		"UserStats":         userStats,
+		"ActiveUsers":       activeUsers,
+		"PrayerStats":       prayerStats,
+		"FastingStats":      fastingStats,
+		"QuranStats":        quranStats,
+		"AmaliahStats":      amaliahStats,
+		"TopUsers":          topUsers,
+		"PrayerPercentage":  prayerPercentage,
+		"FastingPercentage": fastingPercentage,
 	})
 }
 
@@ -645,9 +767,221 @@ func (h *Handler) ShowReports(c echo.Context) error {
 
 func (h *Handler) ShowStatistics(c echo.Context) error {
 	user := c.Get("user").(*models.User)
+
+	// Get date range from query params or use current date
+	startDate := c.QueryParam("start_date")
+	endDate := c.QueryParam("end_date")
+
+	if startDate == "" {
+		startDate = time.Now().AddDate(0, 0, -7).Format("2006-01-02")
+	}
+	if endDate == "" {
+		endDate = time.Now().Format("2006-01-02")
+	}
+
+	// Get statistics
+	userStats, _ := h.UserRepo.GetStats()
+	classes, _ := h.UserRepo.GetAllClasses()
+
 	return c.Render(http.StatusOK, "admin/statistics.html", map[string]interface{}{
-		"Title": "Statistik",
-		"User":  user,
+		"Title":     "Statistik",
+		"User":      user,
+		"UserStats": userStats,
+		"Classes":   classes,
+		"StartDate": startDate,
+		"EndDate":   endDate,
+	})
+}
+
+// Admin User Management - Edit/Update/Delete
+
+func (h *Handler) EditUser(c echo.Context) error {
+	user := c.Get("user").(*models.User)
+
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=ID tidak valid")
+	}
+
+	targetUser, err := h.UserRepo.GetByID(userID)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=User tidak ditemukan")
+	}
+
+	return c.Render(http.StatusOK, "admin/user_edit.html", map[string]interface{}{
+		"Title":      "Edit Siswa",
+		"User":       user,
+		"TargetUser": targetUser,
+		"Error":      c.QueryParam("error"),
+		"Success":    c.QueryParam("success"),
+	})
+}
+
+func (h *Handler) UpdateUser(c echo.Context) error {
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=ID tidak valid")
+	}
+
+	targetUser, err := h.UserRepo.GetByID(userID)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=User tidak ditemukan")
+	}
+
+	// Get form values
+	fullName := c.FormValue("full_name")
+	email := c.FormValue("email")
+	class := c.FormValue("class")
+	role := c.FormValue("role")
+
+	// Validate email uniqueness if changed
+	if email != targetUser.Email {
+		existingUser, _ := h.UserRepo.GetByEmail(email)
+		if existingUser != nil && existingUser.ID != userID {
+			return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/admin/users/edit/%d?error=Email sudah digunakan", userID))
+		}
+	}
+
+	// Update user
+	targetUser.FullName = fullName
+	targetUser.Email = email
+	targetUser.Class = class
+	targetUser.Role = role
+
+	if err := h.UserRepo.Update(targetUser); err != nil {
+		return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/admin/users/edit/%d?error=Gagal memperbarui user", userID))
+	}
+
+	// Handle password reset if provided
+	newPassword := c.FormValue("new_password")
+	if newPassword != "" {
+		if len(newPassword) < 6 {
+			return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/admin/users/edit/%d?error=Password minimal 6 karakter", userID))
+		}
+		hashedPassword, _ := utils.HashPassword(newPassword)
+		h.UserRepo.UpdatePassword(userID, hashedPassword)
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/users?success=User berhasil diperbarui")
+}
+
+func (h *Handler) DeleteUser(c echo.Context) error {
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=ID tidak valid")
+	}
+
+	// Prevent deleting yourself
+	currentUser := c.Get("user").(*models.User)
+	if userID == currentUser.ID {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=Tidak dapat menghapus akun sendiri")
+	}
+
+	if err := h.UserRepo.Delete(userID); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=Gagal menghapus user")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/users?success=User berhasil dihapus")
+}
+
+func (h *Handler) ShowUserDetail(c echo.Context) error {
+	user := c.Get("user").(*models.User)
+
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=ID tidak valid")
+	}
+
+	targetUser, err := h.UserRepo.GetByID(userID)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=User tidak ditemukan")
+	}
+
+	// Get user statistics
+	today := time.Now().Format("2006-01-02")
+	startOfMonth := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, time.Now().Location()).Format("2006-01-02")
+
+	prayerStats, _ := h.PrayerRepo.GetPrayerStats(userID, startOfMonth, today)
+	fastingStats, _ := h.FastingRepo.GetFastingStats(userID, startOfMonth, today)
+	totalReadings, _ := h.QuranRepo.GetTotalReadings(userID)
+	totalPoints, _ := h.AmaliahRepo.GetTotalPoints(userID, startOfMonth, today)
+
+	// Get recent activities
+	recentPrayers, _ := h.PrayerRepo.GetByUser(userID, 7)
+	recentFastings, _ := h.FastingRepo.GetByUser(userID, 7)
+	recentQuran, _ := h.QuranRepo.GetByUser(userID, 5)
+	recentAmaliah, _ := h.AmaliahRepo.GetByUser(userID, 10)
+
+	return c.Render(http.StatusOK, "admin/user_detail.html", map[string]interface{}{
+		"Title":          "Detail Siswa",
+		"User":           user,
+		"TargetUser":     targetUser,
+		"PrayerStats":    prayerStats,
+		"FastingStats":   fastingStats,
+		"TotalReadings":  totalReadings,
+		"TotalPoints":    totalPoints,
+		"RecentPrayers":  recentPrayers,
+		"RecentFastings": recentFastings,
+		"RecentQuran":    recentQuran,
+		"RecentAmaliah":  recentAmaliah,
+	})
+}
+
+func (h *Handler) SearchUsers(c echo.Context) error {
+	user := c.Get("user").(*models.User)
+
+	query := c.QueryParam("q")
+	users, _ := h.UserRepo.SearchUsers(query)
+
+	return c.Render(http.StatusOK, "admin/users.html", map[string]interface{}{
+		"Title":  "Kelola Siswa",
+		"User":   user,
+		"Users":  users,
+		"Search": query,
+	})
+}
+
+// Admin Reports
+
+func (h *Handler) GenerateReport(c echo.Context) error {
+	user := c.Get("user").(*models.User)
+
+	startDate := c.QueryParam("start_date")
+	endDate := c.QueryParam("end_date")
+	reportType := c.QueryParam("type")
+
+	if startDate == "" {
+		startDate = time.Now().Format("2006-01-02")
+	}
+	if endDate == "" {
+		endDate = time.Now().Format("2006-01-02")
+	}
+
+	var data map[string]interface{}
+
+	switch reportType {
+	case "daily":
+		prayerStats, _ := h.PrayerRepo.GetTodayStats(startDate)
+		fastingStats, _ := h.FastingRepo.GetTodayStats(startDate)
+		quranStats, _ := h.QuranRepo.GetTodayStats(startDate)
+		amaliahStats, _ := h.AmaliahRepo.GetTodayStats(startDate)
+		data = map[string]interface{}{
+			"prayer":  prayerStats,
+			"fasting": fastingStats,
+			"quran":   quranStats,
+			"amaliah": amaliahStats,
+		}
+	default:
+		data = map[string]interface{}{}
+	}
+
+	return c.Render(http.StatusOK, "admin/reports.html", map[string]interface{}{
+		"Title":     "Laporan",
+		"User":      user,
+		"Data":      data,
+		"StartDate": startDate,
+		"EndDate":   endDate,
+		"Type":      reportType,
 	})
 }
 
@@ -758,16 +1092,20 @@ func (h *Handler) ShowQuranIndonesia(c echo.Context) error {
 func (h *Handler) ShowProfile(c echo.Context) error {
 	user := c.Get("user").(*models.User)
 
-	// Get user stats
 	totalReadings, _ := h.QuranRepo.GetTotalReadings(user.ID)
 
-	// Get prayer stats for current month
 	today := time.Now()
 	startOfMonth := time.Date(today.Year(), today.Month(), 1, 0, 0, 0, 0, today.Location()).Format("2006-01-02")
 	prayerStats, _ := h.PrayerRepo.GetPrayerStats(user.ID, startOfMonth, today.Format("2006-01-02"))
 
-	// Get fasting stats
 	fastingStats, _ := h.FastingRepo.GetFastingStats(user.ID, startOfMonth, today.Format("2006-01-02"))
+
+	provinsiList, _ := h.ImsakiyahService.GetProvinsi()
+
+	var kabkotaList []string
+	if user.Provinsi != "" {
+		kabkotaList, _ = h.ImsakiyahService.GetKabkota(user.Provinsi)
+	}
 
 	return c.Render(http.StatusOK, "user/profile.html", map[string]interface{}{
 		"Title":         "Profil Saya",
@@ -775,6 +1113,8 @@ func (h *Handler) ShowProfile(c echo.Context) error {
 		"TotalReadings": totalReadings,
 		"PrayerStats":   prayerStats,
 		"FastingStats":  fastingStats,
+		"ProvinsiList":  provinsiList,
+		"KabkotaList":   kabkotaList,
 		"Error":         c.QueryParam("error"),
 		"Success":       c.QueryParam("success"),
 	})
@@ -790,16 +1130,16 @@ func (h *Handler) UpdateProfile(c echo.Context) error {
 		Bio:          c.FormValue("bio"),
 		Avatar:       c.FormValue("avatar"),
 		Theme:        c.FormValue("theme"),
-		TargetKhatam: 30, // Default
+		TargetKhatam: 30,
+		Provinsi:     c.FormValue("provinsi"),
+		Kabkota:      c.FormValue("kabkota"),
 	}
 
-	// Parse target khatam
 	targetKhatam, err := strconv.Atoi(c.FormValue("target_khatam"))
 	if err == nil && targetKhatam >= 1 && targetKhatam <= 30 {
 		req.TargetKhatam = targetKhatam
 	}
 
-	// Validate email uniqueness (check if email changed and not taken)
 	if req.Email != user.Email {
 		existingUser, _ := h.UserRepo.GetByEmail(req.Email)
 		if existingUser != nil && existingUser.ID != user.ID {
@@ -812,7 +1152,6 @@ func (h *Handler) UpdateProfile(c echo.Context) error {
 		return c.Redirect(http.StatusSeeOther, "/user/profile?error=Gagal memperbarui profil")
 	}
 
-	// Refresh user data in context
 	updatedUser, _ := h.UserRepo.GetByID(user.ID)
 	c.Set("user", updatedUser)
 
@@ -854,6 +1193,46 @@ func (h *Handler) ChangePassword(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/user/profile?success=Password berhasil diubah")
+}
+
+func (h *Handler) GetKabkotaAPI(c echo.Context) error {
+	provinsi := c.QueryParam("provinsi")
+	if provinsi == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Provinsi is required"})
+	}
+
+	kabkotaList, err := h.ImsakiyahService.GetKabkota(provinsi)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"provinsi": provinsi,
+		"kabkota":  kabkotaList,
+	})
+}
+
+func (h *Handler) GetImsakiyahAPI(c echo.Context) error {
+	user := c.Get("user").(*models.User)
+
+	provinsi := c.QueryParam("provinsi")
+	kabkota := c.QueryParam("kabkota")
+
+	if provinsi == "" || kabkota == "" {
+		if user.Provinsi != "" && user.Kabkota != "" {
+			provinsi = user.Provinsi
+			kabkota = user.Kabkota
+		} else {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Provinsi dan Kabkota diperlukan"})
+		}
+	}
+
+	data, err := h.ImsakiyahService.GetImsakiyah(provinsi, kabkota)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, data)
 }
 
 // Middleware

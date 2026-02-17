@@ -1,36 +1,51 @@
 {{define "content"}}
-<div class="min-h-screen bg-gray-50 pb-20">
-    <!-- Header -->
-    <header class="bg-emerald-600 text-white pt-safe-top sticky top-0 z-10">
-        <div class="px-6 py-4">
-            <div class="flex items-center space-x-3">
-                <a href="/user/dashboard" class="text-white/80 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="min-h-screen bg-warm-50 pb-24">
+    <header class="gradient-header text-white pt-safe-top relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <circle cx="85" cy="15" r="40" fill="white"/>
+                <circle cx="15" cy="85" r="35" fill="white"/>
+            </svg>
+        </div>
+        <div class="px-5 py-4 relative">
+            <div class="flex items-center gap-3">
+                <a href="/user/dashboard" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </a>
-                <h1 class="text-lg font-bold">Status Puasa</h1>
+                <div>
+                    <h1 class="text-lg font-semibold">Status Puasa</h1>
+                    <p class="text-white/70 text-xs">{{.TodayDate}}</p>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="px-4 py-4">
+    <main class="px-5 py-5">
         {{if .Error}}
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
-            {{.Error}}
+        <div class="card-soft bg-red-50 border border-red-200 text-red-700 mb-4 flex items-center gap-3">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-sm">{{.Error}}</span>
         </div>
         {{end}}
 
         {{if .Success}}
-        <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl mb-4 text-sm">
-            {{.Success}}
+        <div class="card-soft bg-primary-50 border border-primary-200 text-primary-700 mb-4 flex items-center gap-3">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span class="text-sm">{{.Success}}</span>
         </div>
         {{end}}
 
-        <!-- Today's Fasting Status -->
         <div class="card-soft mb-6">
             <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-primary-100 to-primary-50 rounded-full flex items-center justify-center">
+                    <span class="text-3xl">🌙</span>
+                </div>
                 <p class="text-gray-500 text-sm mb-1">Status Puasa Hari Ini</p>
                 <h2 class="text-xl font-bold text-gray-800">{{.TodayDate}}</h2>
             </div>
@@ -38,25 +53,31 @@
             <form action="/user/fasting" method="POST" class="space-y-3">
                 <input type="hidden" name="date" value="{{.TodayDateISO}}">
 
-                <label class="flex items-center p-4 {{if eq .Fasting.Status "puasa"}}bg-emerald-50 border-2 border-emerald-200{{else}}bg-gray-50 border-2 border-gray-200{{end}} rounded-xl cursor-pointer transition-all hover:bg-emerald-100">
-                    <input type="radio" name="status" value="puasa" {{if eq .Fasting.Status "puasa"}}checked{{end}} class="w-5 h-5 text-emerald-600 focus:ring-emerald-500" onchange="toggleReason(false)">
+                <label class="flex items-center p-4 {{if eq .Fasting.Status "puasa"}}bg-primary-50 border-2 border-primary ring-2 ring-primary/20{{else}}bg-gray-50 border-2 border-gray-200{{end}} rounded-xl cursor-pointer transition-all hover:bg-primary-100">
+                    <input type="radio" name="status" value="puasa" {{if eq .Fasting.Status "puasa"}}checked{{end}} class="w-5 h-5 text-primary focus:ring-primary" onchange="toggleReason(false)">
                     <div class="ml-3 flex-1">
-                        <span class="font-semibold {{if eq .Fasting.Status "puasa"}}text-emerald-800{{else}}text-gray-800{{end}} block">✓ Berpuasa</span>
-                        <span class="text-xs {{if eq .Fasting.Status "puasa"}}text-emerald-600{{else}}text-gray-500{{end}}">Menjalankan ibadah puasa hari ini</span>
+                        <span class="font-semibold {{if eq .Fasting.Status "puasa"}}text-primary{{else}}text-gray-800{{end}} block">✓ Berpuasa</span>
+                        <span class="text-xs {{if eq .Fasting.Status "puasa"}}text-primary/70{{else}}text-gray-500{{end}}">Menjalankan ibadah puasa hari ini</span>
                     </div>
+                    {{if eq .Fasting.Status "puasa"}}
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    {{end}}
                 </label>
 
-                <label class="flex items-center p-4 {{if eq .Fasting.Status "tidak"}}bg-red-50 border-2 border-red-200{{else}}bg-gray-50 border-2 border-gray-200{{end}} rounded-xl cursor-pointer transition-all hover:bg-red-100">
-                    <input type="radio" name="status" value="tidak" {{if eq .Fasting.Status "tidak"}}checked{{end}} class="w-5 h-5 text-red-600 focus:ring-red-500" onchange="toggleReason(true)">
+                <label class="flex items-center p-4 {{if eq .Fasting.Status "tidak"}}bg-red-50 border-2 border-red-300 ring-2 ring-red-200{{else}}bg-gray-50 border-2 border-gray-200{{end}} rounded-xl cursor-pointer transition-all hover:bg-red-100">
+                    <input type="radio" name="status" value="tidak" {{if eq .Fasting.Status "tidak"}}checked{{end}} class="w-5 h-5 text-red-500 focus:ring-red-500" onchange="toggleReason(true)">
                     <div class="ml-3 flex-1">
-                        <span class="font-semibold {{if eq .Fasting.Status "tidak"}}text-red-800{{else}}text-gray-800{{end}} block">✗ Tidak Puasa</span>
+                        <span class="font-semibold {{if eq .Fasting.Status "tidak"}}text-red-700{{else}}text-gray-800{{end}} block">✗ Tidak Puasa</span>
                         <span class="text-xs {{if eq .Fasting.Status "tidak"}}text-red-600{{else}}text-gray-500{{end}}">Memiliki udzur tertentu</span>
                     </div>
                 </label>
 
-                <!-- Reason Section -->
                 <div id="reason-section" class="{{if eq .Fasting.Status "tidak"}}{{else}}hidden{{end}} mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Tidak Puasa</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Alasan Tidak Puasa</label>
                     <select name="reason" class="input-field">
                         <option value="">Pilih alasan...</option>
                         <option value="sakit" {{if eq .Fasting.Reason "sakit"}}selected{{end}}>Sakit</option>
@@ -67,102 +88,96 @@
                     </select>
                 </div>
 
-                <button type="submit" class="btn-primary mt-6">
+                <button type="submit" class="btn-primary-gradient mt-6">
                     Simpan Status
                 </button>
             </form>
         </div>
 
-        <!-- Monthly Progress -->
         <div class="card-soft">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-semibold text-gray-800">Progress Puasa</h3>
-                <span class="text-sm font-medium text-emerald-600">{{.Stats.fasting}}/{{.Stats.total_days}} hari</span>
+                <span class="text-sm font-semibold text-primary">{{.Stats.fasting}}/{{.Stats.total_days}} hari</span>
             </div>
 
-            <!-- Progress Bar -->
-            <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+            <div class="w-full bg-gray-100 rounded-full h-3 mb-4">
                 {{$percentage := 0}}{{if gt .Stats.total_days 0}}{{$percentage = multiply (divide .Stats.fasting .Stats.total_days) 100}}{{end}}
-                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 h-3 rounded-full transition-all duration-500" style="width: {{$percentage}}%"></div>
+                <div class="bg-gradient-primary h-3 rounded-full transition-all duration-500" style="width: {{$percentage}}%"></div>
             </div>
 
-            <!-- Calendar Grid -->
             <div class="grid grid-cols-7 gap-1 text-center text-xs mb-4">
-                <div class="text-gray-400 py-2">Min</div>
-                <div class="text-gray-400 py-2">Sen</div>
-                <div class="text-gray-400 py-2">Sel</div>
-                <div class="text-gray-400 py-2">Rab</div>
-                <div class="text-gray-400 py-2">Kam</div>
-                <div class="text-gray-400 py-2">Jum</div>
-                <div class="text-gray-400 py-2">Sab</div>
+                <div class="text-gray-400 py-2 font-medium">Min</div>
+                <div class="text-gray-400 py-2 font-medium">Sen</div>
+                <div class="text-gray-400 py-2 font-medium">Sel</div>
+                <div class="text-gray-400 py-2 font-medium">Rab</div>
+                <div class="text-gray-400 py-2 font-medium">Kam</div>
+                <div class="text-gray-400 py-2 font-medium">Jum</div>
+                <div class="text-gray-400 py-2 font-medium">Sab</div>
 
                 {{range $i := iterate 1 .EmptyDays}}
                 <div class="py-2"></div>
                 {{end}}
 
                 {{range .CalendarDays}}
-                <div class="py-2">
+                <div class="py-1">
                     {{if .HasData}}
                         {{if eq .Status "puasa"}}
-                        <div class="w-8 h-8 mx-auto bg-emerald-100 rounded-lg flex items-center justify-center cursor-pointer" title="{{.Date}} - Puasa">
-                            <span class="font-bold text-emerald-600">{{.Day}}</span>
+                        <div class="w-8 h-8 mx-auto bg-primary rounded-lg flex items-center justify-center cursor-pointer shadow-sm" title="{{.Date}} - Puasa">
+                            <span class="font-bold text-white text-xs">{{.Day}}</span>
                         </div>
                         {{else}}
-                        <div class="w-8 h-8 mx-auto bg-red-100 rounded-lg flex items-center justify-center cursor-pointer" title="{{.Date}} - Tidak Puasa: {{.Reason}}">
-                            <span class="font-bold text-red-600">{{.Day}}</span>
+                        <div class="w-8 h-8 mx-auto bg-red-100 rounded-lg flex items-center justify-center cursor-pointer" title="{{.Date}} - Tidak Puasa">
+                            <span class="font-bold text-red-600 text-xs">{{.Day}}</span>
                         </div>
                         {{end}}
                     {{else if .IsToday}}
-                        <div class="w-8 h-8 mx-auto bg-emerald-500 rounded-lg flex items-center justify-center ring-2 ring-emerald-300 ring-offset-2">
-                            <span class="font-bold text-white">{{.Day}}</span>
+                        <div class="w-8 h-8 mx-auto bg-gradient-accent rounded-lg flex items-center justify-center ring-2 ring-accent/50 ring-offset-2 shadow-card">
+                            <span class="font-bold text-white text-xs">{{.Day}}</span>
                         </div>
                     {{else}}
                         <div class="w-8 h-8 mx-auto rounded-lg flex items-center justify-center {{if .IsPast}}text-gray-400{{else}}text-gray-300{{end}}">
-                            <span>{{.Day}}</span>
+                            <span class="text-xs">{{.Day}}</span>
                         </div>
                     {{end}}
                 </div>
                 {{end}}
             </div>
 
-            <!-- Legend -->
-            <div class="flex justify-center space-x-4 text-xs">
-                <div class="flex items-center">
-                    <div class="w-3 h-3 bg-emerald-100 rounded mr-1"></div>
+            <div class="flex justify-center space-x-6 text-xs">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 bg-primary rounded"></div>
                     <span class="text-gray-600">Puasa</span>
                 </div>
-                <div class="flex items-center">
-                    <div class="w-3 h-3 bg-red-100 rounded mr-1"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 bg-red-100 rounded"></div>
                     <span class="text-gray-600">Tidak</span>
                 </div>
-                <div class="flex items-center">
-                    <div class="w-3 h-3 bg-emerald-500 rounded mr-1"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 bg-gradient-accent rounded"></div>
                     <span class="text-gray-600">Hari Ini</span>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="card-soft mt-6">
-            <h3 class="font-semibold text-gray-800 mb-4">Statistik</h3>
-            <div class="grid grid-cols-3 gap-4">
-                <div class="text-center">
-                    <p class="text-2xl font-bold text-emerald-600">{{.Stats.fasting}}</p>
-                    <p class="text-xs text-gray-600">Hari Puasa</p>
+        <div class="card-soft mt-4">
+            <h3 class="font-semibold text-gray-800 mb-4">Statistik Bulan Ini</h3>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="text-center p-4 bg-primary-50 rounded-xl">
+                    <p class="text-2xl font-bold text-primary">{{.Stats.fasting}}</p>
+                    <p class="text-xs text-gray-600 mt-1">Hari Puasa</p>
                 </div>
-                <div class="text-center">
-                    <p class="text-2xl font-bold text-red-600">{{.Stats.not_fasting}}</p>
-                    <p class="text-xs text-gray-600">Tidak Puasa</p>
+                <div class="text-center p-4 bg-red-50 rounded-xl">
+                    <p class="text-2xl font-bold text-red-500">{{.Stats.not_fasting}}</p>
+                    <p class="text-xs text-gray-600 mt-1">Tidak Puasa</p>
                 </div>
-                <div class="text-center">
-                    <p class="text-2xl font-bold text-emerald-600">{{.Stats.total_days}}</p>
-                    <p class="text-xs text-gray-600">Total Hari</p>
+                <div class="text-center p-4 bg-accent-50 rounded-xl">
+                    <p class="text-2xl font-bold text-accent">{{.Stats.total_days}}</p>
+                    <p class="text-xs text-gray-600 mt-1">Total Hari</p>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-20">
         <div class="max-w-md mx-auto flex justify-around py-2">
             <a href="/user/dashboard" class="nav-item">
@@ -178,9 +193,11 @@
                 <span class="text-xs mt-1">Shalat</span>
             </a>
             <a href="/user/amaliah" class="nav-item">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
+                <div class="w-12 h-12 -mt-6 bg-gradient-primary rounded-full flex items-center justify-center shadow-card">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </div>
                 <span class="text-xs mt-1">Tambah</span>
             </a>
             <a href="/user/quran" class="nav-item">

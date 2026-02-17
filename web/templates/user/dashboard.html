@@ -1,182 +1,244 @@
 {{define "content"}}
-<div class="min-h-screen bg-gray-50 pb-20">
-    <!-- Header -->
-    <header class="bg-emerald-600 text-white pt-safe-top sticky top-0 z-10">
-        <div class="px-6 py-4">
+<div class="min-h-screen bg-warm-50 pb-24">
+    <header class="gradient-header text-white pt-safe-top relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <circle cx="85" cy="15" r="40" fill="white"/>
+                <circle cx="15" cy="85" r="35" fill="white"/>
+            </svg>
+        </div>
+        <div class="px-5 py-4 relative">
             <div class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-lg font-bold">Dashboard</h1>
-                    <p class="text-emerald-100 text-xs">{{.User.FullName}}</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <span class="text-lg">👤</span>
+                    </div>
+                    <div>
+                        <p class="text-white/70 text-xs">Assalamu'alaikum</p>
+                        <h1 class="text-lg font-semibold">{{.User.FullName}}</h1>
+                    </div>
                 </div>
-                <a href="/logout" class="text-white/80 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                <a href="/user/profile" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </a>
             </div>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="px-4 py-4 space-y-4">
-        <!-- Stats Card -->
-        <div class="stat-card">
-            <div class="flex justify-between items-start">
-                <div>
-                    <p class="text-emerald-100 text-sm">Total Poin</p>
-                    <h2 class="text-3xl font-bold mt-1">{{.User.Points}}</h2>
-                </div>
-                <div class="bg-white/20 p-2 rounded-lg">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-                    </svg>
+        
+        <div class="px-5 pb-6 relative">
+            <!-- Compact Info Card with Points and Schedule -->
+            <div class="bg-white rounded-2xl shadow-card p-4">
+                <div class="flex gap-3">
+                    <!-- Points Section -->
+                    <div class="flex-1 bg-primary/5 rounded-xl p-3">
+                        <div class="flex items-center gap-2 mb-1">
+                            <div class="w-8 h-8 bg-gradient-accent rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-xs">Poin</p>
+                                <p class="text-xl font-bold text-primary">{{.User.Points}}</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500">{{.TodayCompleted}}/7 selesai</p>
+                    </div>
+                    
+                    <!-- Schedule Section -->
+                    {{if .TodaySchedule}}
+                    <button onclick="openImsakiyahModal()" class="flex-1 bg-accent/10 rounded-xl p-3 text-left hover:bg-accent/20 transition-colors">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-lg">🕌</span>
+                            <div>
+                                <p class="text-gray-500 text-xs">Imsak</p>
+                                <p class="text-xl font-bold text-accent">{{.TodaySchedule.Imsak}}</p>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500">Ramadhan {{.TodaySchedule.Tanggal}}</p>
+                    </button>
+                    {{else}}
+                    <a href="/user/profile" class="flex-1 bg-gray-100 rounded-xl p-3 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                        <div class="text-center">
+                            <span class="text-lg">📍</span>
+                            <p class="text-xs text-gray-500 mt-1">Atur Lokasi</p>
+                        </div>
+                    </a>
+                    {{end}}
                 </div>
             </div>
-            <div class="mt-4 flex items-center text-sm">
-                <span class="bg-white/20 px-2 py-1 rounded text-xs">🎯 Target Harian</span>
-                <span class="ml-2 text-emerald-100">{{.TodayCompleted}}/7 selesai</span>
+        </div>
+    </header>
+
+    <main class="px-5 -mt-2 space-y-4">
+        <div class="grid grid-cols-3 gap-3">
+            <div class="card-soft text-center py-4">
+                {{if gt .Streak.PrayerStreak 0}}
+                <div class="flex items-center justify-center gap-1 mb-1">
+                    <span class="text-base">🔥</span>
+                </div>
+                {{end}}
+                <p class="text-2xl font-bold text-primary">{{.Streak.PrayerStreak}}</p>
+                <p class="text-xs text-gray-500 mt-1">Shalat</p>
+                {{if gt .Streak.BestPrayer 0}}
+                <p class="text-xs text-accent font-medium">Best: {{.Streak.BestPrayer}}</p>
+                {{end}}
+            </div>
+            <div class="card-soft text-center py-4">
+                {{if gt .Streak.FastingStreak 0}}
+                <div class="flex items-center justify-center gap-1 mb-1">
+                    <span class="text-base">🔥</span>
+                </div>
+                {{end}}
+                <p class="text-2xl font-bold text-primary">{{.Streak.FastingStreak}}</p>
+                <p class="text-xs text-gray-500 mt-1">Puasa</p>
+                {{if gt .Streak.BestFasting 0}}
+                <p class="text-xs text-accent font-medium">Best: {{.Streak.BestFasting}}</p>
+                {{end}}
+            </div>
+            <div class="card-soft text-center py-4">
+                {{if gt .Streak.QuranStreak 0}}
+                <div class="flex items-center justify-center gap-1 mb-1">
+                    <span class="text-base">🔥</span>
+                </div>
+                {{end}}
+                <p class="text-2xl font-bold text-accent">{{.Streak.QuranStreak}}</p>
+                <p class="text-xs text-gray-500 mt-1">Quran</p>
+                {{if gt .Streak.BestQuran 0}}
+                <p class="text-xs text-primary font-medium">Best: {{.Streak.BestQuran}}</p>
+                {{end}}
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="grid grid-cols-2 gap-3">
-            <a href="/user/prayers" class="card-soft hover:shadow-md transition-shadow">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="card-soft">
+            <h3 class="font-semibold text-gray-800 mb-4">Menu Utama</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <a href="/user/prayers" class="flex items-center gap-3 p-3 rounded-xl bg-primary-50 hover:bg-primary-100 transition-colors">
+                    <div class="w-11 h-11 bg-gradient-primary rounded-xl flex items-center justify-center shadow-card">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-sm text-gray-800">Shalat</h3>
+                        <h4 class="font-semibold text-sm text-gray-800">Shalat</h4>
                         <p class="text-xs text-gray-500">{{.PrayerCompleted}}/5 waktu</p>
                     </div>
-                </div>
-            </a>
+                </a>
 
-            <a href="/user/fasting" class="card-soft hover:shadow-md transition-shadow">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="/user/fasting" class="flex items-center gap-3 p-3 rounded-xl bg-primary-50 hover:bg-primary-100 transition-colors">
+                    <div class="w-11 h-11 bg-gradient-primary rounded-xl flex items-center justify-center shadow-card">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-sm text-gray-800">Puasa</h3>
+                        <h4 class="font-semibold text-sm text-gray-800">Puasa</h4>
                         <p class="text-xs text-gray-500">
-                            {{if .Fasting}}
-                                {{if eq .Fasting.Status "puasa"}}✓ Puasa{{else}}✗ Tidak{{end}}
-                            {{else}}Belum diisi{{end}}
+                            {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}✓ Puasa{{else}}✗ Tidak{{end}}{{else}}Belum diisi{{end}}
                         </p>
                     </div>
-                </div>
-            </a>
+                </a>
 
-            <a href="/user/quran" class="card-soft hover:shadow-md transition-shadow">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="/user/quran" class="flex items-center gap-3 p-3 rounded-xl bg-accent-50 hover:bg-accent-100 transition-colors">
+                    <div class="w-11 h-11 bg-gradient-accent rounded-xl flex items-center justify-center shadow-card">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-sm text-gray-800">Al-Quran</h3>
-                        <p class="text-xs text-gray-500">{{.TotalReadings}} x baca</p>
+                        <h4 class="font-semibold text-sm text-gray-800">Al-Quran</h4>
+                        <p class="text-xs text-gray-500">{{.TotalReadings}}x baca</p>
                     </div>
-                </div>
-            </a>
+                </a>
 
-            <a href="/user/amaliah" class="card-soft hover:shadow-md transition-shadow">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="/user/amaliah" class="flex items-center gap-3 p-3 rounded-xl bg-accent-50 hover:bg-accent-100 transition-colors">
+                    <div class="w-11 h-11 bg-gradient-accent rounded-xl flex items-center justify-center shadow-card">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="font-semibold text-sm text-gray-800">Amaliah</h3>
+                        <h4 class="font-semibold text-sm text-gray-800">Amaliah</h4>
                         <p class="text-xs text-gray-500">+{{.TodayPoints}} poin</p>
                     </div>
-                </div>
-            </a>
+                </a>
+            </div>
         </div>
 
-        <!-- Today's Progress -->
         <div class="card-soft">
-            <h3 class="font-semibold text-gray-800 mb-4">Progress Hari Ini</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-800">Progress Hari Ini</h3>
+                <span class="text-xs text-gray-500">{{.PrayerCompleted}}/5 selesai</span>
+            </div>
             
-            <!-- Shalat Progress -->
-            <div class="mb-4">
-                <div class="flex justify-between text-sm mb-2">
-                    <span class="text-gray-600">Shalat 5 Waktu</span>
-                    <span class="font-medium text-emerald-600">{{.PrayerCompleted}}/5</span>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-600">Shalat 5 Waktu</span>
+                        <span class="font-semibold text-primary">{{.PrayerCompleted}}/5</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div class="bg-gradient-primary h-2.5 rounded-full transition-all duration-500" style="width: {{multiply (divide .PrayerCompleted 5) 100}}%"></div>
+                    </div>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-emerald-600 h-2 rounded-full transition-all duration-500" style="width: {{multiply (divide .PrayerCompleted 5) 100}}%"></div>
+
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-600">Status Puasa</span>
+                        <span class="font-semibold {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}text-primary{{else}}text-red-500{{end}}{{else}}text-gray-400{{end}}">
+                            {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}✓ Puasa{{else}}✗ Tidak{{end}}{{else}}Belum diisi{{end}}
+                        </span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div class="h-2.5 rounded-full transition-all duration-500 {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}bg-gradient-primary{{else}}bg-red-400{{end}}{{else}}bg-gray-300{{end}}" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-600">Bacaan Quran</span>
+                        <span class="font-semibold text-accent">{{.TotalReadings}}x</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div class="bg-gradient-accent h-2.5 rounded-full transition-all duration-500" style="width: {{if gt .TotalReadings 0}}100{{else}}0{{end}}%"></div>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Puasa -->
-            <div class="mb-4">
-                <div class="flex justify-between text-sm mb-2">
-                    <span class="text-gray-600">Status Puasa</span>
-                    <span class="font-medium {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}text-emerald-600{{else}}text-red-600{{end}}{{else}}text-gray-400{{end}}">
-                        {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}✓ Puasa{{else}}✗ Tidak Puasa{{end}}{{else}}Belum diisi{{end}}
-                    </span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="{{if .Fasting}}{{if eq .Fasting.Status "puasa"}}bg-emerald-500{{else}}bg-red-500{{end}}{{else}}bg-gray-300{{end}} h-2 rounded-full transition-all duration-500" 
-                         style="width: {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}100{{else}}100{{end}}{{else}}0{{end}}%"></div>
-                </div>
-            </div>
-
-            <!-- Quran -->
-            <div>
-                <div class="flex justify-between text-sm mb-2">
-                    <span class="text-gray-600">Bacaan Quran</span>
-                    <span class="font-medium text-amber-600">{{.TotalReadings}} x baca</span>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-amber-500 h-2 rounded-full transition-all duration-500" style="width: {{if gt .TotalReadings 0}}100{{else}}0{{end}}%"></div>
-                </div>
+        <div class="card-soft">
+            <h3 class="font-semibold text-gray-800 mb-4">Konten Islami</h3>
+            <div class="grid grid-cols-4 gap-2">
+                <a href="/jadwal" class="text-center p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br from-primary to-teal-500 flex items-center justify-center">
+                        <span class="text-xl">🕌</span>
+                    </div>
+                    <p class="text-xs font-medium text-gray-700">Jadwal</p>
+                </a>
+                <a href="/user/doa" class="text-center p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br from-teal-100 to-teal-50 flex items-center justify-center">
+                        <span class="text-xl">🤲</span>
+                    </div>
+                    <p class="text-xs font-medium text-gray-700">Doa</p>
+                </a>
+                <a href="/user/hadits" class="text-center p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center">
+                        <span class="text-xl">📚</span>
+                    </div>
+                    <p class="text-xs font-medium text-gray-700">Hadits</p>
+                </a>
+                <a href="/user/quran-indonesia" class="text-center p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-gradient-to-br from-cyan-100 to-cyan-50 flex items-center justify-center">
+                        <span class="text-xl">📖</span>
+                    </div>
+                    <p class="text-xs font-medium text-gray-700">Quran</p>
+                </a>
             </div>
         </div>
     </main>
 
-    <!-- Quick Access Islamic Content -->
-    <div class="px-4 py-2 mb-20">
-        <h3 class="font-semibold text-gray-800 mb-3">Konten Islami</h3>
-        <div class="grid grid-cols-3 gap-3">
-            <a href="/user/doa" class="card-soft hover:shadow-md transition-shadow text-center py-4">
-                <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
-                </div>
-                <h3 class="font-semibold text-xs text-gray-800">Doa Harian</h3>
-            </a>
-
-            <a href="/user/hadits" class="card-soft hover:shadow-md transition-shadow text-center py-4">
-                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
-                </div>
-                <h3 class="font-semibold text-xs text-gray-800">Hadits</h3>
-            </a>
-
-            <a href="/user/quran-indonesia" class="card-soft hover:shadow-md transition-shadow text-center py-4">
-                <div class="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <svg class="w-6 h-6 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
-                </div>
-                <h3 class="font-semibold text-xs text-gray-800">Quran ID</h3>
-            </a>
-        </div>
-    </div>
-
-    <!-- Bottom Navigation -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-20">
         <div class="max-w-md mx-auto flex justify-around py-2">
             <a href="/user/dashboard" class="nav-item nav-item-active">
@@ -192,9 +254,11 @@
                 <span class="text-xs mt-1">Shalat</span>
             </a>
             <a href="/user/amaliah" class="nav-item">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
+                <div class="w-12 h-12 -mt-6 bg-gradient-primary rounded-full flex items-center justify-center shadow-card">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </div>
                 <span class="text-xs mt-1">Tambah</span>
             </a>
             <a href="/user/quran" class="nav-item">
@@ -211,5 +275,95 @@
             </a>
         </div>
     </nav>
+
+    <!-- Imsakiyah Modal Popup -->
+    {{if .TodaySchedule}}
+    <div id="imsakiyahModal" class="fixed inset-0 bg-black/50 z-50 hidden items-end justify-center">
+        <div class="bg-white rounded-t-3xl w-full max-w-md p-6 animate-slide-up">
+            <!-- Handle Bar -->
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+            
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <span class="text-3xl">🕌</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Jadwal Imsakiyah</h3>
+                <p class="text-gray-500 text-sm">{{.User.Kabkota}}, {{.User.Provinsi}}</p>
+                <p class="text-primary font-medium mt-1">Ramadhan Hari ke-{{.TodaySchedule.Tanggal}}</p>
+            </div>
+
+            <!-- Prayer Times Grid -->
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="bg-accent/10 rounded-xl p-4 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Imsak</p>
+                    <p class="text-2xl font-bold text-accent">{{.TodaySchedule.Imsak}}</p>
+                </div>
+                <div class="bg-primary/10 rounded-xl p-4 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Subuh</p>
+                    <p class="text-2xl font-bold text-primary">{{.TodaySchedule.Subuh}}</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Terbit</p>
+                    <p class="text-xl font-bold text-gray-700">{{.TodaySchedule.Terbit}}</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-3 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Dhuha</p>
+                    <p class="text-xl font-bold text-gray-700">{{.TodaySchedule.Dhuha}}</p>
+                </div>
+                <div class="bg-primary/10 rounded-xl p-3 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Dzuhur</p>
+                    <p class="text-xl font-bold text-primary">{{.TodaySchedule.Dzuhur}}</p>
+                </div>
+                <div class="bg-primary/10 rounded-xl p-3 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Ashar</p>
+                    <p class="text-xl font-bold text-primary">{{.TodaySchedule.Ashar}}</p>
+                </div>
+                <div class="bg-accent/10 rounded-xl p-3 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Maghrib</p>
+                    <p class="text-xl font-bold text-accent">{{.TodaySchedule.Maghrib}}</p>
+                </div>
+                <div class="bg-primary/10 rounded-xl p-3 text-center">
+                    <p class="text-xs text-gray-500 mb-1">Isya</p>
+                    <p class="text-xl font-bold text-primary">{{.TodaySchedule.Isya}}</p>
+                </div>
+            </div>
+
+            <!-- Close Button -->
+            <button onclick="closeImsakiyahModal()" class="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                Tutup
+            </button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes slide-up {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slide-up 0.3s ease-out;
+        }
+    </style>
+
+    <script>
+        function openImsakiyahModal() {
+            document.getElementById('imsakiyahModal').classList.remove('hidden');
+            document.getElementById('imsakiyahModal').classList.add('flex');
+        }
+
+        function closeImsakiyahModal() {
+            document.getElementById('imsakiyahModal').classList.add('hidden');
+            document.getElementById('imsakiyahModal').classList.remove('flex');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('imsakiyahModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImsakiyahModal();
+            }
+        });
+    </script>
+    {{end}}
 </div>
 {{end}}

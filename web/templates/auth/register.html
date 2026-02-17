@@ -1,90 +1,138 @@
 {{define "content"}}
 <div class="min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="bg-emerald-600 text-white pt-safe-top">
-        <div class="px-6 py-6">
-            <h1 class="text-2xl font-bold">Daftar</h1>
-            <p class="text-emerald-100 text-sm mt-1">Buat akun baru</p>
+    <header class="gradient-header text-white pt-safe-top relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <circle cx="80" cy="20" r="40" fill="white"/>
+                <circle cx="20" cy="80" r="30" fill="white"/>
+            </svg>
+        </div>
+        <div class="px-6 py-8 relative">
+            <a href="/" class="inline-flex items-center text-white/80 hover:text-white mb-4 transition-colors">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Kembali
+            </a>
+            <h1 class="text-2xl font-bold">Daftar Akun</h1>
+            <p class="text-white/80 text-sm mt-1">Buat akun untuk memulai</p>
         </div>
     </header>
 
-    <!-- Register Form -->
     <main class="flex-1 px-6 py-8 -mt-4">
-        <div class="card-soft fade-in">
+        <div class="card-glass fade-in">
             {{if .Error}}
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
-                {{.Error}}
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm flex items-center gap-2">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>{{.Error}}</span>
             </div>
             {{end}}
 
             <form action="/register" method="POST" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                    <input 
-                        type="text" 
-                        name="full_name" 
-                        required
-                        class="input-field"
-                        placeholder="Masukkan nama lengkap"
-                    >
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Lengkap</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </span>
+                        <input 
+                            type="text" 
+                            name="full_name" 
+                            required
+                            class="input-field pl-12"
+                            placeholder="Masukkan nama lengkap"
+                        >
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                    <input 
-                        type="text" 
-                        name="username" 
-                        required
-                        class="input-field"
-                        placeholder="Masukkan username"
-                        autocomplete="username"
-                    >
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </span>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            required
+                            class="input-field pl-12"
+                            placeholder="Masukkan username"
+                            autocomplete="username"
+                        >
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input 
-                        type="email" 
-                        name="email" 
-                        required
-                        class="input-field"
-                        placeholder="Masukkan email"
-                        autocomplete="email"
-                    >
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                            </svg>
+                        </span>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            required
+                            class="input-field pl-12"
+                            placeholder="Masukkan email"
+                            autocomplete="email"
+                        >
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
-                    <input 
-                        type="text" 
-                        name="class" 
-                        required
-                        class="input-field"
-                        placeholder="Contoh: 10-A"
-                    >
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Kelas</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </span>
+                        <input 
+                            type="text" 
+                            name="class" 
+                            required
+                            class="input-field pl-12"
+                            placeholder="Contoh: 10-A"
+                        >
+                    </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                    <input 
-                        type="password" 
-                        name="password" 
-                        required
-                        class="input-field"
-                        placeholder="Minimal 6 karakter"
-                        autocomplete="new-password"
-                    >
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </span>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            required
+                            class="input-field pl-12"
+                            placeholder="Minimal 6 karakter"
+                            autocomplete="new-password"
+                        >
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-primary">
+                <button type="submit" class="btn-primary-gradient mt-6">
                     Daftar
                 </button>
             </form>
 
-            <div class="mt-6 text-center">
+            <div class="mt-6 pt-6 border-t border-gray-100 text-center">
                 <p class="text-sm text-gray-600">
                     Sudah punya akun?
-                    <a href="/login" class="text-emerald-600 font-semibold hover:text-emerald-700">
+                    <a href="/login" class="text-primary font-semibold hover:text-primary-700 ml-1">
                         Masuk
                     </a>
                 </p>

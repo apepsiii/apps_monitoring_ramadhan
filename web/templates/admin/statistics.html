@@ -1,0 +1,263 @@
+{{define "content"}}
+<div class="min-h-screen pb-20">
+    <header class="islamic-pattern text-white safe-top sticky top-0 z-10">
+        <div class="px-4 py-4">
+            <div class="flex items-center space-x-3">
+                <a href="/admin/dashboard" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-lg font-bold">Statistik</h1>
+                    <p class="text-white/70 text-xs">Admin Panel</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-4 py-4 space-y-4 fade-in">
+        <div class="bg-white rounded-2xl card-shadow p-4">
+            <form action="/admin/statistics" method="GET" class="flex gap-3">
+                <input type="date" name="start_date" value="{{.StartDate}}" 
+                    class="flex-1 px-4 py-3 bg-warm-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <input type="date" name="end_date" value="{{.EndDate}}" 
+                    class="flex-1 px-4 py-3 bg-warm-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <button type="submit" class="px-6 py-3 gradient-primary text-white rounded-xl text-sm font-medium">
+                    Filter
+                </button>
+            </form>
+        </div>
+
+        {{if .UserStats}}
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white rounded-2xl card-shadow p-4 text-center">
+                <span class="block text-2xl font-bold text-primary">{{.UserStats.total_users}}</span>
+                <span class="text-xs text-gray-600">Total Siswa</span>
+            </div>
+            <div class="bg-white rounded-2xl card-shadow p-4 text-center">
+                <span class="block text-2xl font-bold text-accent">{{.UserStats.total_points}}</span>
+                <span class="text-xs text-gray-600">Total Poin</span>
+            </div>
+            <div class="bg-white rounded-2xl card-shadow p-4 text-center">
+                <span class="block text-2xl font-bold text-gray-700">{{.UserStats.total_classes}}</span>
+                <span class="text-xs text-gray-600">Total Kelas</span>
+            </div>
+            <div class="bg-white rounded-2xl card-shadow p-4 text-center">
+                <span class="block text-2xl font-bold text-blue-600">{{.UserStats.admin_count}}</span>
+                <span class="text-xs text-gray-600">Admin</span>
+            </div>
+        </div>
+        {{end}}
+
+        <div class="bg-white rounded-2xl card-shadow p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center mr-2">
+                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                        <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                    </svg>
+                </span>
+                Statistik Ibadah
+            </h3>
+            
+            <div class="mb-6">
+                <h4 class="text-sm font-medium text-gray-600 mb-2">Shalat 5 Waktu</h4>
+                <div class="bg-warm-100 rounded-xl p-4 h-48 flex items-center justify-center">
+                    <canvas id="prayerChart"></canvas>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h4 class="text-sm font-medium text-gray-600 mb-2">Puasa</h4>
+                <div class="bg-warm-100 rounded-xl p-4 h-48 flex items-center justify-center">
+                    <canvas id="fastingChart"></canvas>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h4 class="text-sm font-medium text-gray-600 mb-2">Tilawah Quran</h4>
+                <div class="bg-warm-100 rounded-xl p-4 h-48 flex items-center justify-center">
+                    <canvas id="quranChart"></canvas>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-medium text-gray-600 mb-2">Amaliah Harian</h4>
+                <div class="bg-warm-100 rounded-xl p-4 h-48 flex items-center justify-center">
+                    <canvas id="amaliahChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{if .Classes}}
+        <div class="bg-white rounded-2xl card-shadow p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="w-8 h-8 rounded-lg gradient-accent flex items-center justify-center mr-2">
+                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+                    </svg>
+                </span>
+                Kelas Terdaftar
+            </h3>
+            <div class="flex flex-wrap gap-2">
+                {{range .Classes}}
+                <span class="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                    {{.}}
+                </span>
+                {{end}}
+            </div>
+        </div>
+        {{end}}
+
+        <div class="bg-white rounded-2xl card-shadow p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="w-8 h-8 rounded-lg gradient-accent flex items-center justify-center mr-2">
+                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
+                </span>
+                Top Performers
+            </h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-accent/10 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 gradient-accent rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">1</span>
+                        </div>
+                        <span class="font-medium text-gray-800">Shalat Tepat Waktu</span>
+                    </div>
+                    <span class="text-accent font-bold">92%</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-primary/10 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 gradient-primary rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">2</span>
+                        </div>
+                        <span class="font-medium text-gray-800">Puasa Konsisten</span>
+                    </div>
+                    <span class="text-primary font-bold">88%</span>
+                </div>
+                <div class="flex items-center justify-between p-3 bg-purple-50 rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">3</span>
+                        </div>
+                        <span class="font-medium text-gray-800">Amaliah Aktif</span>
+                    </div>
+                    <span class="text-purple-600 font-bold">1,245 poin</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const prayerCtx = document.getElementById('prayerChart').getContext('2d');
+        new Chart(prayerCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'],
+                datasets: [{
+                    label: 'Siswa Shalat',
+                    data: [120, 135, 128, 142, 138],
+                    backgroundColor: ['#0D7E5E', '#0D7E5E', '#0D7E5E', '#0D7E5E', '#0D7E5E'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        const fastingCtx = document.getElementById('fastingChart').getContext('2d');
+        new Chart(fastingCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Berpuasa', 'Tidak Puasa'],
+                datasets: [{
+                    data: [138, 12],
+                    backgroundColor: ['#0D7E5E', '#EF4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%'
+            }
+        });
+
+        const quranCtx = document.getElementById('quranChart').getContext('2d');
+        new Chart(quranCtx, {
+            type: 'line',
+            data: {
+                labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                datasets: [{
+                    label: 'Tilawah',
+                    data: [45, 52, 48, 61, 58, 42, 55],
+                    borderColor: '#D4AF37',
+                    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        const amaliahCtx = document.getElementById('amaliahChart').getContext('2d');
+        new Chart(amaliahCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Sedekah', 'Dzikir', 'Sholat Dhuha', 'Tahfidz', 'Lainnya'],
+                datasets: [{
+                    data: [45, 78, 32, 28, 52],
+                    backgroundColor: ['#8B5CF6', '#0D7E5E', '#D4AF37', '#EF4444', '#6B7280']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-20">
+        <div class="max-w-md mx-auto flex justify-around py-2">
+            <a href="/admin/dashboard" class="flex flex-col items-center text-gray-400 hover:text-primary">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-xs mt-1">Dashboard</span>
+            </a>
+            <a href="/admin/users" class="flex flex-col items-center text-gray-400 hover:text-primary">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <span class="text-xs mt-1">Siswa</span>
+            </a>
+            <a href="/admin/statistics" class="flex flex-col items-center text-primary">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                    <path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                </svg>
+                <span class="text-xs mt-1 font-semibold">Statistik</span>
+            </a>
+            <a href="/logout" class="flex flex-col items-center text-gray-400 hover:text-red-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                <span class="text-xs mt-1">Keluar</span>
+            </a>
+        </div>
+    </nav>
+</div>
+{{end}}

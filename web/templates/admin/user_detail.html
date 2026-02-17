@@ -1,0 +1,148 @@
+{{define "content"}}
+<div class="min-h-screen pb-20">
+    <header class="islamic-pattern text-white safe-top">
+        <div class="px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-xl font-bold">Detail Siswa</h1>
+                    <p class="text-white/70 text-sm">Admin Panel</p>
+                </div>
+                <a href="/admin/users" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-4 py-4 -mt-4 space-y-4 fade-in">
+        <div class="bg-white rounded-2xl card-shadow p-6 text-center">
+            <div class="w-20 h-20 rounded-full gradient-primary flex items-center justify-center text-white text-3xl font-bold mx-auto mb-3 shadow-lg">
+                {{if eq .TargetUser.Avatar "default"}}
+                    {{slice .TargetUser.FullName 0 1}}
+                {{else}}
+                    {{.TargetUser.Avatar}}
+                {{end}}
+            </div>
+            <h2 class="text-xl font-bold text-gray-800">{{.TargetUser.FullName}}</h2>
+            <p class="text-gray-500 text-sm">@{{.TargetUser.Username}}</p>
+            <span class="inline-block mt-2 px-4 py-1 rounded-full text-xs font-medium {{if eq .TargetUser.Role "admin"}}bg-accent/20 text-accent{{else}}bg-primary/10 text-primary{{end}}">
+                {{if eq .TargetUser.Role "admin"}}Admin{{else}}Siswa{{end}}
+            </span>
+            
+            <div class="flex justify-center gap-8 mt-4 pt-4 border-t border-gray-100">
+                <div class="text-center">
+                    <span class="block text-2xl font-bold text-primary">{{.TargetUser.Points}}</span>
+                    <span class="text-gray-500 text-xs">Poin</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-2xl font-bold text-accent">{{.TotalReadings}}</span>
+                    <span class="text-gray-500 text-xs">Tilawah</span>
+                </div>
+                <div class="text-center">
+                    <span class="block text-2xl font-bold text-gray-700">{{.TotalPoints}}</span>
+                    <span class="text-gray-500 text-xs">Amaliah</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white rounded-2xl card-shadow p-4 text-center">
+                <span class="block text-2xl font-bold text-primary">{{.PrayerStats.subuh}}</span>
+                <span class="text-xs text-gray-600">Subuh Tepat Waktu</span>
+            </div>
+            <div class="bg-white rounded-2xl card-shadow p-4 text-center">
+                <span class="block text-2xl font-bold text-accent">{{.FastingStats.fasting}}</span>
+                <span class="text-xs text-gray-600">Hari Puasa</span>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <a href="/admin/users/edit/{{.TargetUser.ID}}" class="flex-1 gradient-accent text-white font-semibold py-3 rounded-xl text-center card-shadow">
+                Edit Data
+            </a>
+            <a href="/admin/users/delete/{{.TargetUser.ID}}" onclick="return confirm('Yakin ingin menghapus user ini?')" class="flex-1 bg-red-500 text-white font-semibold py-3 rounded-xl text-center card-shadow hover:bg-red-600 transition-colors">
+                Hapus
+            </a>
+        </div>
+
+        <div class="bg-white rounded-2xl card-shadow p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center mr-2">
+                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+                    </svg>
+                </span>
+                Aktivitas Terbaru
+            </h3>
+            
+            {{if .RecentPrayers}}
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-600 mb-2">Shalat</h4>
+                <div class="space-y-2">
+                    {{range .RecentPrayers}}
+                    <div class="flex items-center justify-between p-2 bg-warm-100 rounded-lg text-sm">
+                        <span class="text-gray-700">{{.Date}}</span>
+                        <div class="flex gap-1">
+                            <span class="w-6 h-6 rounded-full {{if eq .Subuh "jamaah"}}bg-primary{{else if eq .Subuh "sendiri"}}bg-primary/50{{else}}bg-gray-300{{end}} flex items-center justify-center text-white text-xs">S</span>
+                            <span class="w-6 h-6 rounded-full {{if eq .Dzuhur "jamaah"}}bg-primary{{else if eq .Dzuhur "sendiri"}}bg-primary/50{{else}}bg-gray-300{{end}} flex items-center justify-center text-white text-xs">D</span>
+                            <span class="w-6 h-6 rounded-full {{if eq .Ashar "jamaah"}}bg-primary{{else if eq .Ashar "sendiri"}}bg-primary/50{{else}}bg-gray-300{{end}} flex items-center justify-center text-white text-xs">A</span>
+                            <span class="w-6 h-6 rounded-full {{if eq .Maghrib "jamaah"}}bg-primary{{else if eq .Maghrib "sendiri"}}bg-primary/50{{else}}bg-gray-300{{end}} flex items-center justify-center text-white text-xs">M</span>
+                            <span class="w-6 h-6 rounded-full {{if eq .Isya "jamaah"}}bg-primary{{else if eq .Isya "sendiri"}}bg-primary/50{{else}}bg-gray-300{{end}} flex items-center justify-center text-white text-xs">I</span>
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+
+            {{if .RecentQuran}}
+            <div class="mb-4">
+                <h4 class="text-sm font-medium text-gray-600 mb-2">Tilawah Quran</h4>
+                <div class="space-y-2">
+                    {{range .RecentQuran}}
+                    <div class="p-3 bg-accent/10 rounded-xl text-sm">
+                        <p class="text-gray-700 font-medium">{{.StartSurahName}} ayat {{.StartAyah}} - {{.EndAyah}}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{.Date}}</p>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+
+            {{if .RecentAmaliah}}
+            <div>
+                <h4 class="text-sm font-medium text-gray-600 mb-2">Amaliah</h4>
+                <div class="space-y-2">
+                    {{range .RecentAmaliah}}
+                    <div class="flex items-center justify-between p-3 bg-primary/10 rounded-xl text-sm">
+                        <span class="text-gray-700">{{.AmaliahType.Name}}</span>
+                        <span class="text-primary font-semibold">+{{.AmaliahType.Points}} pts</span>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+        </div>
+
+        <div class="bg-warm-100 rounded-2xl p-4">
+            <h3 class="font-semibold text-gray-700 mb-3 text-sm">Informasi Akun</h3>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Email</span>
+                    <span class="font-medium text-gray-800">{{.TargetUser.Email}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Kelas</span>
+                    <span class="font-medium text-gray-800">{{.TargetUser.Class}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Bergabung</span>
+                    <span class="font-medium text-gray-800">{{.TargetUser.CreatedAt.Format "2 Jan 2006"}}</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{{end}}

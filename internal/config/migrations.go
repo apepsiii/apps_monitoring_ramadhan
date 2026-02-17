@@ -2,13 +2,15 @@ package config
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func RunMigrations(db *sql.DB) error {
 	migrations := []string{
-		`DROP TABLE IF EXISTS users`,
-		`CREATE TABLE users (
+		`CREATE TABLE IF NOT EXISTS users (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			username VARCHAR(50) UNIQUE NOT NULL,
 			email VARCHAR(100) UNIQUE NOT NULL,
@@ -21,6 +23,8 @@ func RunMigrations(db *sql.DB) error {
 			bio TEXT,
 			theme VARCHAR(20) DEFAULT 'emerald',
 			target_khatam INTEGER DEFAULT 30,
+			provinsi VARCHAR(100) DEFAULT '',
+			kabkota VARCHAR(100) DEFAULT '',
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 		)`,
@@ -46,8 +50,7 @@ func RunMigrations(db *sql.DB) error {
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			FOREIGN KEY (user_id) REFERENCES users(id)
 		)`,
-		`DROP TABLE IF EXISTS quran_readings`,
-		`CREATE TABLE quran_readings (
+		`CREATE TABLE IF NOT EXISTS quran_readings (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			user_id INTEGER NOT NULL,
 			date DATE NOT NULL,
@@ -103,5 +106,61 @@ func RunMigrations(db *sql.DB) error {
 		log.Printf("Migration %d executed successfully", i+1)
 	}
 
+	if err := addColumnIfNotExists(db, "users", "provinsi", "VARCHAR(100) DEFAULT ''"); err != nil {
+		log.Printf("Note: %v", err)
+	}
+	if err := addColumnIfNotExists(db, "users", "kabkota", "VARCHAR(100) DEFAULT ''"); err != nil {
+		log.Printf("Note: %v", err)
+	}
+
+	if err := seedAdminUser(db); err != nil {
+		log.Printf("Failed to seed admin user: %v", err)
+	}
+
+	return nil
+}
+
+func addColumnIfNotExists(db *sql.DB, table, column, definition string) error {
+	var exists int
+	err := db.QueryRow("SELECT COUNT(*) FROM pragma_table_info(?) WHERE name=?", table, column).Scan(&exists)
+	if err != nil {
+		return err
+	}
+
+	if exists == 0 {
+		_, err = db.Exec(fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", table, column, definition))
+		if err != nil {
+			return fmt.Errorf("failed to add column %s: %v", column, err)
+		}
+		log.Printf("Added column %s to table %s", column, table)
+	}
+	return nil
+}
+
+func seedAdminUser(db *sql.DB) error {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE role = 'admin'").Scan(&count)
+	if err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	query := `INSERT INTO users (username, email, password_hash, full_name, class, role, points, avatar, bio, theme) 
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	_, err = db.Exec(query, "admin", "admin@ramadhan.com", string(hashedPassword), "Administrator", "", "admin", 0, "default", "", "emerald")
+	if err != nil {
+		return err
+	}
+
+	log.Println("Default admin user created: admin / admin123")
 	return nil
 }
