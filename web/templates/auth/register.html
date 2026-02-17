@@ -1,0 +1,95 @@
+{{define "content"}}
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-emerald-600 text-white pt-safe-top">
+        <div class="px-6 py-6">
+            <h1 class="text-2xl font-bold">Daftar</h1>
+            <p class="text-emerald-100 text-sm mt-1">Buat akun baru</p>
+        </div>
+    </header>
+
+    <!-- Register Form -->
+    <main class="flex-1 px-6 py-8 -mt-4">
+        <div class="card-soft fade-in">
+            {{if .Error}}
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
+                {{.Error}}
+            </div>
+            {{end}}
+
+            <form action="/register" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                    <input 
+                        type="text" 
+                        name="full_name" 
+                        required
+                        class="input-field"
+                        placeholder="Masukkan nama lengkap"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input 
+                        type="text" 
+                        name="username" 
+                        required
+                        class="input-field"
+                        placeholder="Masukkan username"
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input 
+                        type="email" 
+                        name="email" 
+                        required
+                        class="input-field"
+                        placeholder="Masukkan email"
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                    <input 
+                        type="text" 
+                        name="class" 
+                        required
+                        class="input-field"
+                        placeholder="Contoh: 10-A"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        required
+                        class="input-field"
+                        placeholder="Minimal 6 karakter"
+                        autocomplete="new-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Daftar
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Sudah punya akun?
+                    <a href="/login" class="text-emerald-600 font-semibold hover:text-emerald-700">
+                        Masuk
+                    </a>
+                </p>
+            </div>
+        </div>
+    </main>
+</div>
+{{end}}

@@ -1,0 +1,359 @@
+{{define "content"}}
+<div class="min-h-screen bg-gray-50 pb-20">
+    <!-- Header with Personalization -->
+    <header class="bg-{{if eq .User.Theme "blue"}}blue{{else if eq .User.Theme "purple"}}purple{{else if eq .User.Theme "rose"}}rose{{else if eq .User.Theme "amber"}}amber{{else}}emerald{{end}}-600 text-white pt-safe-top sticky top-0 z-10">
+        <div class="px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-lg font-bold">Profil Saya</h1>
+                    <p class="text-white/80 text-xs">Personalisasi & Customisasi</p>
+                </div>
+                <a href="/user/dashboard" class="text-white/80 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-4 space-y-4">
+        {{if .Error}}
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
+            {{.Error}}
+        </div>
+        {{end}}
+
+        {{if .Success}}
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl mb-4 text-sm">
+            {{.Success}}
+        </div>
+        {{end}}
+
+        <!-- Profile Header Card -->
+        <div class="bg-white rounded-2xl shadow-sm p-6 text-center">
+            <!-- Avatar -->
+            <div class="relative inline-block mb-4">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-{{if eq .User.Theme "blue"}}blue{{else if eq .User.Theme "purple"}}purple{{else if eq .User.Theme "rose"}}rose{{else if eq .User.Theme "amber"}}amber{{else}}emerald{{end}}-400 to-{{if eq .User.Theme "blue"}}blue{{else if eq .User.Theme "purple"}}purple{{else if eq .User.Theme "rose"}}rose{{else if eq .User.Theme "amber"}}amber{{else}}emerald{{end}}-600 flex items-center justify-center text-white text-4xl font-bold">
+                    {{if eq .User.Avatar "default"}}
+                        {{slice .User.FullName 0 1}}
+                    {{else}}
+                        {{.User.Avatar}}
+                    {{end}}
+                </div>
+                <div class="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md">
+                    <span class="text-lg">✨</span>
+                </div>
+            </div>
+            
+            <h2 class="text-xl font-bold text-gray-800">{{.User.FullName}}</h2>
+            <p class="text-gray-500 text-sm">@{{.User.Username}}</p>
+            
+            {{if .User.Bio}}
+            <p class="text-gray-600 text-sm mt-2 italic">"{{.User.Bio}}"</p>
+            {{end}}
+            
+            <div class="flex justify-center gap-4 mt-4 text-sm">
+                <div class="text-center">
+                    <span class="block font-bold text-gray-800">{{.TotalReadings}}</span>
+                    <span class="text-gray-500 text-xs">Tilawah</span>
+                </div>
+                <div class="text-center">
+                    <span class="block font-bold text-gray-800">{{.User.Points}}</span>
+                    <span class="text-gray-500 text-xs">Poin</span>
+                </div>
+                <div class="text-center">
+                    <span class="block font-bold text-gray-800">{{.User.TargetKhatam}}</span>
+                    <span class="text-gray-500 text-xs">Target</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Stats -->
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="mr-2">📊</span> Statistik Amaliah
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-emerald-50 rounded-xl p-3 text-center">
+                    <span class="block text-2xl font-bold text-emerald-600">{{.PrayerStats.subuh}}</span>
+                    <span class="text-xs text-gray-600">Subuh Tepat Waktu</span>
+                </div>
+                <div class="bg-emerald-50 rounded-xl p-3 text-center">
+                    <span class="block text-2xl font-bold text-emerald-600">{{.FastingStats.fasting}}</span>
+                    <span class="text-xs text-gray-600">Hari Puasa</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="mr-2">✏️</span> Edit Profil
+            </h3>
+            
+            <form action="/user/profile" method="POST" class="space-y-4">
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
+                    <input type="text" name="full_name" value="{{.User.FullName}}" class="input-field" required>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" name="email" value="{{.User.Email}}" class="input-field" required>
+                </div>
+
+                <!-- Class -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Kelas</label>
+                    <input type="text" name="class" value="{{.User.Class}}" class="input-field" placeholder="Contoh: XII RPL 1">
+                </div>
+
+                <!-- Bio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Bio / Status</label>
+                    <textarea name="bio" class="input-field" rows="2" placeholder="Tulis motto atau target Ramadhanmu...">{{.User.Bio}}</textarea>
+                </div>
+
+                <!-- Target Khatam -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Target Khatam (Hari)</label>
+                    <select name="target_khatam" class="input-field">
+                        {{range $i := iterate 15 31}}
+                        <option value="{{$i}}" {{if eq $.User.TargetKhatam $i}}selected{{end}}>Hari ke-{{$i}}</option>
+                        {{end}}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    💾 Simpan Perubahan
+                </button>
+            </form>
+        </div>
+
+        <!-- Avatar Selection -->
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="mr-2">🎭</span> Pilih Avatar
+            </h3>
+            <form action="/user/profile" method="POST" class="space-y-4">
+                <div class="grid grid-cols-5 gap-2">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="default" {{if eq .User.Avatar "default"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white text-lg font-bold border-2 {{if eq .User.Avatar "default"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            {{slice .User.FullName 0 1}}
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="🦁" {{if eq .User.Avatar "🦁"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "🦁"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            🦁
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="🦅" {{if eq .User.Avatar "🦅"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "🦅"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            🦅
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="🌙" {{if eq .User.Avatar "🌙"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "🌙"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            🌙
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="⭐" {{if eq .User.Avatar "⭐"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "⭐"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            ⭐
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="🌟" {{if eq .User.Avatar "🌟"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "🌟"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            🌟
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="🌸" {{if eq .User.Avatar "🌸"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "🌸"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            🌸
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="🌿" {{if eq .User.Avatar "🌿"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "🌿"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            🌿
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="🦋" {{if eq .User.Avatar "🦋"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "🦋"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            🦋
+                        </div>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="avatar" value="🕌" {{if eq .User.Avatar "🕌"}}checked{{end}} class="hidden">
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-2xl border-2 {{if eq .User.Avatar "🕌"}}border-emerald-500{{else}}border-transparent{{end}} hover:border-emerald-300 transition-all">
+                            🕌
+                        </div>
+                    </label>
+                </div>
+                <input type="hidden" name="full_name" value="{{.User.FullName}}">
+                <input type="hidden" name="email" value="{{.User.Email}}">
+                <input type="hidden" name="class" value="{{.User.Class}}">
+                <input type="hidden" name="bio" value="{{.User.Bio}}">
+                <input type="hidden" name="theme" value="{{.User.Theme}}">
+                <input type="hidden" name="target_khatam" value="{{.User.TargetKhatam}}">
+                <button type="submit" class="btn-primary w-full">
+                    🎭 Simpan Avatar
+                </button>
+            </form>
+        </div>
+
+        <!-- Theme Customization -->
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="mr-2">🎨</span> Tema Warna
+            </h3>
+            <form action="/user/profile" method="POST" class="space-y-4">
+                <div class="grid grid-cols-5 gap-2">
+                    <label class="cursor-pointer">
+                        <input type="radio" name="theme" value="emerald" {{if eq .User.Theme "emerald"}}checked{{end}} class="hidden">
+                        <div class="w-full h-12 rounded-xl bg-emerald-500 flex items-center justify-center border-2 {{if eq .User.Theme "emerald"}}border-gray-800{{else}}border-transparent{{end}} hover:scale-105 transition-all">
+                            {{if eq .User.Theme "emerald"}}✓{{end}}
+                        </div>
+                        <p class="text-xs text-center mt-1 text-gray-600">Hijau</p>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="theme" value="blue" {{if eq .User.Theme "blue"}}checked{{end}} class="hidden">
+                        <div class="w-full h-12 rounded-xl bg-blue-500 flex items-center justify-center border-2 {{if eq .User.Theme "blue"}}border-gray-800{{else}}border-transparent{{end}} hover:scale-105 transition-all">
+                            {{if eq .User.Theme "blue"}}✓{{end}}
+                        </div>
+                        <p class="text-xs text-center mt-1 text-gray-600">Biru</p>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="theme" value="purple" {{if eq .User.Theme "purple"}}checked{{end}} class="hidden">
+                        <div class="w-full h-12 rounded-xl bg-purple-500 flex items-center justify-center border-2 {{if eq .User.Theme "purple"}}border-gray-800{{else}}border-transparent{{end}} hover:scale-105 transition-all">
+                            {{if eq .User.Theme "purple"}}✓{{end}}
+                        </div>
+                        <p class="text-xs text-center mt-1 text-gray-600">Ungu</p>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="theme" value="rose" {{if eq .User.Theme "rose"}}checked{{end}} class="hidden">
+                        <div class="w-full h-12 rounded-xl bg-rose-500 flex items-center justify-center border-2 {{if eq .User.Theme "rose"}}border-gray-800{{else}}border-transparent{{end}} hover:scale-105 transition-all">
+                            {{if eq .User.Theme "rose"}}✓{{end}}
+                        </div>
+                        <p class="text-xs text-center mt-1 text-gray-600">Merah</p>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="theme" value="amber" {{if eq .User.Theme "amber"}}checked{{end}} class="hidden">
+                        <div class="w-full h-12 rounded-xl bg-amber-500 flex items-center justify-center border-2 {{if eq .User.Theme "amber"}}border-gray-800{{else}}border-transparent{{end}} hover:scale-105 transition-all">
+                            {{if eq .User.Theme "amber"}}✓{{end}}
+                        </div>
+                        <p class="text-xs text-center mt-1 text-gray-600">Kuning</p>
+                    </label>
+                </div>
+                <input type="hidden" name="full_name" value="{{.User.FullName}}">
+                <input type="hidden" name="email" value="{{.User.Email}}">
+                <input type="hidden" name="class" value="{{.User.Class}}">
+                <input type="hidden" name="bio" value="{{.User.Bio}}">
+                <input type="hidden" name="avatar" value="{{.User.Avatar}}">
+                <input type="hidden" name="target_khatam" value="{{.User.TargetKhatam}}">
+                <button type="submit" class="btn-primary w-full">
+                    🎨 Simpan Tema
+                </button>
+            </form>
+        </div>
+
+        <!-- Change Password -->
+        <div class="bg-white rounded-2xl shadow-sm p-4">
+            <h3 class="font-semibold text-gray-800 mb-4 flex items-center">
+                <span class="mr-2">🔐</span> Ganti Password
+            </h3>
+            
+            <form action="/user/profile/change-password" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password Saat Ini</label>
+                    <input type="password" name="current_password" class="input-field" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password Baru</label>
+                    <input type="password" name="new_password" class="input-field" required minlength="6">
+                    <p class="text-xs text-gray-500 mt-1">Minimal 6 karakter</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password Baru</label>
+                    <input type="password" name="confirm_password" class="input-field" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn-primary bg-gray-700 hover:bg-gray-800">
+                    🔐 Ganti Password
+                </button>
+            </form>
+        </div>
+
+        <!-- Motivational Quote -->
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 text-white text-center">
+            <p class="text-lg font-medium mb-2">🌟 Target Ramadhanmu 🌟</p>
+            <p class="text-3xl font-bold">{{.User.TargetKhatam}} Hari</p>
+            <p class="text-sm mt-2 opacity-90">"Barang siapa menempuh jalan untuk mencari ilmu, Allah akan memudahkan baginya jalan ke surga."</p>
+            <p class="text-xs mt-1 opacity-75">- HR. Muslim</p>
+        </div>
+
+        <!-- Account Info -->
+        <div class="bg-gray-100 rounded-2xl p-4">
+            <h3 class="font-semibold text-gray-700 mb-3 text-sm">Informasi Akun</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Username</span>
+                    <span class="font-medium text-gray-800">{{.User.Username}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Bergabung</span>
+                    <span class="font-medium text-gray-800">{{.User.CreatedAt.Format "2 Jan 2006"}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Role</span>
+                    <span class="font-medium text-gray-800 capitalize">{{.User.Role}}</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-20">
+        <div class="max-w-md mx-auto flex justify-around py-2">
+            <a href="/user/dashboard" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-xs mt-1">Home</span>
+            </a>
+            <a href="/user/prayers" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xs mt-1">Shalat</span>
+            </a>
+            <a href="/user/profile" class="nav-item nav-item-active">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-xs mt-1">Profil</span>
+            </a>
+            <a href="/logout" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                <span class="text-xs mt-1">Logout</span>
+            </a>
+        </div>
+    </nav>
+</div>
+{{end}}

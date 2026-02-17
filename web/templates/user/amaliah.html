@@ -1,0 +1,151 @@
+{{define "content"}}
+<div class="min-h-screen bg-gray-50 pb-20">
+    <!-- Header -->
+    <header class="bg-emerald-600 text-white pt-safe-top sticky top-0 z-10">
+        <div class="px-6 py-4">
+            <div class="flex items-center space-x-3">
+                <a href="/user/dashboard" class="text-white/80 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <h1 class="text-lg font-bold">Amaliah Harian</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-4">
+        {{if .Error}}
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
+            {{.Error}}
+        </div>
+        {{end}}
+
+        {{if .Success}}
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl mb-4 text-sm">
+            {{.Success}}
+        </div>
+        {{end}}
+
+        <!-- Points Card -->
+        <div class="stat-card mb-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-emerald-100 text-sm">Poin Anda</p>
+                    <h2 class="text-3xl font-bold mt-1">{{.User.Points}}</h2>
+                    <p class="text-emerald-100 text-xs mt-1">+{{.TodayPoints}} poin hari ini</p>
+                </div>
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Amaliah -->
+        <div class="card-soft mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-semibold text-gray-800">Amaliah Hari Ini</h3>
+                <span class="text-xs text-gray-500">{{.CompletedCount}}/{{len .Types}} selesai</span>
+            </div>
+
+            <div class="space-y-3">
+                {{range .Types}}
+                {{$isCompleted := index $.CompletedMap .ID}}
+                <div class="flex items-center p-3 {{if $isCompleted}}bg-emerald-50{{else}}bg-gray-50{{end}} rounded-xl transition-all">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium {{if $isCompleted}}text-emerald-800{{else}}text-gray-800{{end}}">{{.Name}}</span>
+                            <span class="text-xs font-medium {{if $isCompleted}}text-emerald-600{{else}}text-gray-400{{end}}">+{{.Points}} pts</span>
+                        </div>
+                        <p class="text-xs {{if $isCompleted}}text-emerald-600{{else}}text-gray-500{{end}} mt-1">{{.Description}}</p>
+                    </div>
+                    
+                    <form action="/user/amaliah" method="POST" class="ml-3">
+                        <input type="hidden" name="amaliah_type_id" value="{{.ID}}">
+                        {{if $isCompleted}}
+                        <input type="hidden" name="action" value="remove">
+                        <button type="submit" class="w-10 h-10 bg-emerald-500 text-white rounded-lg flex items-center justify-center hover:bg-emerald-600 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </button>
+                        {{else}}
+                        <input type="hidden" name="action" value="add">
+                        <button type="submit" class="w-10 h-10 bg-gray-200 text-gray-400 rounded-lg flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                        </button>
+                        {{end}}
+                    </form>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="card-soft">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-semibold text-gray-800">Leaderboard</h3>
+                <a href="/user/leaderboard" class="text-xs text-emerald-600 font-medium">Lihat Semua →</a>
+            </div>
+
+            <div class="space-y-3">
+                {{range $index, $item := .Leaderboard}}
+                <div class="flex items-center justify-between p-3 {{if eq $item.id $.User.ID}}bg-emerald-50 border-2 border-emerald-200{{else if eq $index 0}}bg-amber-50 border border-amber-200{{else}}bg-gray-50{{end}} rounded-xl">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 {{if eq $index 0}}bg-amber-500{{else if eq $index 1}}bg-gray-400{{else if eq $index 2}}bg-orange-500{{else}}bg-emerald-100{{end}} rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">{{add $index 1}}</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-800 text-sm">{{$item.full_name}}</p>
+                            <p class="text-xs text-gray-500">{{$item.class}}</p>
+                        </div>
+                    </div>
+                    <span class="font-bold {{if eq $index 0}}text-amber-600{{else if eq $item.id $.User.ID}}text-emerald-600{{else}}text-gray-600{{end}}">{{$item.points}} pts</span>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-20">
+        <div class="max-w-md mx-auto flex justify-around py-2">
+            <a href="/user/dashboard" class="nav-item">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-xs mt-1">Home</span>
+            </a>
+            <a href="/user/prayers" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xs mt-1">Shalat</span>
+            </a>
+            <a href="/user/amaliah" class="nav-item nav-item-active">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span class="text-xs mt-1">Tambah</span>
+            </a>
+            <a href="/user/quran" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                <span class="text-xs mt-1">Quran</span>
+            </a>
+            <a href="/user/profile" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-xs mt-1">Profil</span>
+            </a>
+        </div>
+    </nav>
+</div>
+{{end}}

@@ -1,0 +1,21 @@
+{
+  "name": "amaliah-monitoring",
+  "version": "1.0.0",
+  "description": "Aplikasi monitoring amaliah Ramadhan",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css --minify",
+    "watch:css": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/output.css --watch",
+    "dev": "npm run watch:css"
+  },
+  "keywords": [
+    "ramadhan",
+    "monitoring",
+    "amaliah"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

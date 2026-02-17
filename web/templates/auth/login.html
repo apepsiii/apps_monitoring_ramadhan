@@ -1,0 +1,68 @@
+{{define "content"}}
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-emerald-600 text-white pt-safe-top">
+        <div class="px-6 py-6">
+            <h1 class="text-2xl font-bold">Masuk</h1>
+            <p class="text-emerald-100 text-sm mt-1">Selamat datang kembali</p>
+        </div>
+    </header>
+
+    <!-- Login Form -->
+    <main class="flex-1 px-6 py-8 -mt-4">
+        <div class="card-soft fade-in">
+            {{if .Error}}
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
+                {{.Error}}
+            </div>
+            {{end}}
+
+            <form action="/login" method="POST" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <input 
+                        type="text" 
+                        name="username" 
+                        required
+                        class="input-field"
+                        placeholder="Masukkan username"
+                        autocomplete="username"
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        required
+                        class="input-field"
+                        placeholder="Masukkan password"
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    Masuk
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Belum punya akun?
+                    <a href="/register" class="text-emerald-600 font-semibold hover:text-emerald-700">
+                        Daftar sekarang
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Decorative Elements -->
+        <div class="mt-8 flex justify-center space-x-4">
+            <div class="w-2 h-2 bg-emerald-300 rounded-full"></div>
+            <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
+            <div class="w-2 h-2 bg-emerald-500 rounded-full"></div>
+        </div>
+    </main>
+</div>
+{{end}}

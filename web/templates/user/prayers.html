@@ -1,0 +1,255 @@
+{{define "content"}}
+<div class="min-h-screen bg-gray-50 pb-20">
+    <!-- Header -->
+    <header class="bg-emerald-600 text-white pt-safe-top sticky top-0 z-10">
+        <div class="px-6 py-4">
+            <div class="flex items-center space-x-3">
+                <a href="/user/dashboard" class="text-white/80 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <h1 class="text-lg font-bold">Shalat Harian</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 py-4">
+        {{if .Error}}
+        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
+            {{.Error}}
+        </div>
+        {{end}}
+
+        {{if .Success}}
+        <div class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl mb-4 text-sm">
+            {{.Success}}
+        </div>
+        {{end}}
+
+        <!-- Date Display -->
+        <div class="text-center mb-6">
+            <p class="text-gray-500 text-sm">Hari Ini</p>
+            <h2 class="text-xl font-bold text-gray-800">{{.TodayDate}}</h2>
+        </div>
+
+        <!-- Prayer Form -->
+        <form action="/user/prayers" method="POST" class="space-y-3">
+            <input type="hidden" name="date" value="{{.TodayDateISO}}">
+            
+            <!-- Subuh -->
+            <div class="card-soft">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Subuh</h3>
+                            <p class="text-xs text-gray-500">04:30 - 06:00</p>
+                        </div>
+                    </div>
+                    <select name="subuh" class="prayer-status {{if eq .Prayer.Subuh "jamaah"}}prayer-status-jamaah{{else if eq .Prayer.Subuh "sendiri"}}prayer-status-sendiri{{else if eq .Prayer.Subuh "tidak"}}prayer-status-tidak{{else}}prayer-status-belum{{end}}" onchange="updateSelectStyle(this)">
+                        <option value="belum" {{if eq .Prayer.Subuh "belum"}}selected{{end}}>Belum</option>
+                        <option value="jamaah" {{if eq .Prayer.Subuh "jamaah"}}selected{{end}}>Jamaah</option>
+                        <option value="sendiri" {{if eq .Prayer.Subuh "sendiri"}}selected{{end}}>Sendiri</option>
+                        <option value="tidak" {{if eq .Prayer.Subuh "tidak"}}selected{{end}}>Tidak</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Dzuhur -->
+            <div class="card-soft">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Dzuhur</h3>
+                            <p class="text-xs text-gray-500">11:50 - 15:00</p>
+                        </div>
+                    </div>
+                    <select name="dzuhur" class="prayer-status {{if eq .Prayer.Dzuhur "jamaah"}}prayer-status-jamaah{{else if eq .Prayer.Dzuhur "sendiri"}}prayer-status-sendiri{{else if eq .Prayer.Dzuhur "tidak"}}prayer-status-tidak{{else}}prayer-status-belum{{end}}" onchange="updateSelectStyle(this)">
+                        <option value="belum" {{if eq .Prayer.Dzuhur "belum"}}selected{{end}}>Belum</option>
+                        <option value="jamaah" {{if eq .Prayer.Dzuhur "jamaah"}}selected{{end}}>Jamaah</option>
+                        <option value="sendiri" {{if eq .Prayer.Dzuhur "sendiri"}}selected{{end}}>Sendiri</option>
+                        <option value="tidak" {{if eq .Prayer.Dzuhur "tidak"}}selected{{end}}>Tidak</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Ashar -->
+            <div class="card-soft">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Ashar</h3>
+                            <p class="text-xs text-gray-500">15:15 - 17:30</p>
+                        </div>
+                    </div>
+                    <select name="ashar" class="prayer-status {{if eq .Prayer.Ashar "jamaah"}}prayer-status-jamaah{{else if eq .Prayer.Ashar "sendiri"}}prayer-status-sendiri{{else if eq .Prayer.Ashar "tidak"}}prayer-status-tidak{{else}}prayer-status-belum{{end}}" onchange="updateSelectStyle(this)">
+                        <option value="belum" {{if eq .Prayer.Ashar "belum"}}selected{{end}}>Belum</option>
+                        <option value="jamaah" {{if eq .Prayer.Ashar "jamaah"}}selected{{end}}>Jamaah</option>
+                        <option value="sendiri" {{if eq .Prayer.Ashar "sendiri"}}selected{{end}}>Sendiri</option>
+                        <option value="tidak" {{if eq .Prayer.Ashar "tidak"}}selected{{end}}>Tidak</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Maghrib -->
+            <div class="card-soft">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Maghrib</h3>
+                            <p class="text-xs text-gray-500">18:05 - 19:15</p>
+                        </div>
+                    </div>
+                    <select name="maghrib" class="prayer-status {{if eq .Prayer.Maghrib "jamaah"}}prayer-status-jamaah{{else if eq .Prayer.Maghrib "sendiri"}}prayer-status-sendiri{{else if eq .Prayer.Maghrib "tidak"}}prayer-status-tidak{{else}}prayer-status-belum{{end}}" onchange="updateSelectStyle(this)">
+                        <option value="belum" {{if eq .Prayer.Maghrib "belum"}}selected{{end}}>Belum</option>
+                        <option value="jamaah" {{if eq .Prayer.Maghrib "jamaah"}}selected{{end}}>Jamaah</option>
+                        <option value="sendiri" {{if eq .Prayer.Maghrib "sendiri"}}selected{{end}}>Sendiri</option>
+                        <option value="tidak" {{if eq .Prayer.Maghrib "tidak"}}selected{{end}}>Tidak</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Isya -->
+            <div class="card-soft">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-800">Isya</h3>
+                            <p class="text-xs text-gray-500">19:30 - 23:59</p>
+                        </div>
+                    </div>
+                    <select name="isya" class="prayer-status {{if eq .Prayer.Isya "jamaah"}}prayer-status-jamaah{{else if eq .Prayer.Isya "sendiri"}}prayer-status-sendiri{{else if eq .Prayer.Isya "tidak"}}prayer-status-tidak{{else}}prayer-status-belum{{end}}" onchange="updateSelectStyle(this)">
+                        <option value="belum" {{if eq .Prayer.Isya "belum"}}selected{{end}}>Belum</option>
+                        <option value="jamaah" {{if eq .Prayer.Isya "jamaah"}}selected{{end}}>Jamaah</option>
+                        <option value="sendiri" {{if eq .Prayer.Isya "sendiri"}}selected{{end}}>Sendiri</option>
+                        <option value="tidak" {{if eq .Prayer.Isya "tidak"}}selected{{end}}>Tidak</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <button type="submit" class="btn-primary mt-6">
+                Simpan Perubahan
+            </button>
+        </form>
+
+        <!-- Weekly Stats -->
+        <div class="card-soft mt-6">
+            <h3 class="font-semibold text-gray-800 mb-4">Statistik Minggu Ini</h3>
+            <div class="grid grid-cols-7 gap-1 text-center">
+                {{range .WeekPrayers}}
+                <div>
+                    {{$count := 0}}
+                    {{if or (eq .Subuh "jamaah") (eq .Subuh "sendiri")}}{{$count = add $count 1}}{{end}}
+                    {{if or (eq .Dzuhur "jamaah") (eq .Dzuhur "sendiri")}}{{$count = add $count 1}}{{end}}
+                    {{if or (eq .Ashar "jamaah") (eq .Ashar "sendiri")}}{{$count = add $count 1}}{{end}}
+                    {{if or (eq .Maghrib "jamaah") (eq .Maghrib "sendiri")}}{{$count = add $count 1}}{{end}}
+                    {{if or (eq .Isya "jamaah") (eq .Isya "sendiri")}}{{$count = add $count 1}}{{end}}
+                    
+                    <div class="w-8 h-8 mx-auto {{if eq $count 5}}bg-emerald-100{{else if ge $count 3}}bg-amber-100{{else}}bg-gray-100{{end}} rounded-lg flex items-center justify-center mb-1">
+                        <span class="text-xs font-bold {{if eq $count 5}}text-emerald-600{{else if ge $count 3}}text-amber-600{{else}}text-gray-400{{end}}">{{$count}}</span>
+                    </div>
+                    <p class="text-xs text-gray-500">{{formatDateShort .Date}}</p>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="card-soft mt-6">
+            <h3 class="font-semibold text-gray-800 mb-4">Ringkasan Bulan Ini</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="text-center p-3 bg-emerald-50 rounded-xl">
+                    <p class="text-2xl font-bold text-emerald-600">{{.MonthStats.subuh}}</p>
+                    <p class="text-xs text-gray-600">Subuh Tepat Waktu</p>
+                </div>
+                <div class="text-center p-3 bg-emerald-50 rounded-xl">
+                    <p class="text-2xl font-bold text-emerald-600">{{.MonthStats.total_days}}</p>
+                    <p class="text-xs text-gray-600">Hari Tercatat</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-bottom z-20">
+        <div class="max-w-md mx-auto flex justify-around py-2">
+            <a href="/user/dashboard" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                </svg>
+                <span class="text-xs mt-1">Home</span>
+            </a>
+            <a href="/user/prayers" class="nav-item nav-item-active">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-xs mt-1">Shalat</span>
+            </a>
+            <a href="/user/amaliah" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                <span class="text-xs mt-1">Tambah</span>
+            </a>
+            <a href="/user/quran" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                <span class="text-xs mt-1">Quran</span>
+            </a>
+            <a href="/user/profile" class="nav-item">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-xs mt-1">Profil</span>
+            </a>
+        </div>
+    </nav>
+</div>
+
+<script>
+function updateSelectStyle(select) {
+    select.className = 'prayer-status ';
+    switch(select.value) {
+        case 'jamaah':
+            select.classList.add('prayer-status-jamaah');
+            break;
+        case 'sendiri':
+            select.classList.add('prayer-status-sendiri');
+            break;
+        case 'tidak':
+            select.classList.add('prayer-status-tidak');
+            break;
+        default:
+            select.classList.add('prayer-status-belum');
+    }
+}
+</script>
+{{end}}
