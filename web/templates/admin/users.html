@@ -29,7 +29,12 @@
                     </svg>
                 </div>
             </form>
-            <button onclick="toggleModal()" class="w-12 h-12 gradient-accent text-white rounded-xl card-shadow flex items-center justify-center">
+            <button onclick="toggleImportModal()" class="w-12 h-12 bg-blue-500 text-white rounded-xl card-shadow flex items-center justify-center" title="Import Excel">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+            </button>
+            <button onclick="toggleModal()" class="w-12 h-12 gradient-accent text-white rounded-xl card-shadow flex items-center justify-center" title="Tambah User">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
@@ -39,6 +44,24 @@
         {{if .Search}}
         <div class="mb-4 bg-primary/10 rounded-xl px-4 py-2">
             <p class="text-sm text-primary">Hasil pencarian: <span class="font-semibold">"{{.Search}}"</span></p>
+        </div>
+        {{end}}
+
+        {{if .Success}}
+        <div class="mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-start space-x-3">
+            <svg class="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <p class="text-sm text-green-800">{{.Success}}</p>
+        </div>
+        {{end}}
+
+        {{if .Error}}
+        <div class="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start space-x-3">
+            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <p class="text-sm text-red-800">{{.Error}}</p>
         </div>
         {{end}}
 
@@ -145,6 +168,82 @@
         </div>
     </div>
 
+    <!-- Modal Import User -->
+    <div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="sticky top-0 bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-t-3xl">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold">Import User</h2>
+                        <p class="text-white/80 text-sm">Upload file Excel</p>
+                    </div>
+                    <button onclick="toggleImportModal()" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 space-y-4">
+                <!-- Download Template Button -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div class="flex items-start space-x-3">
+                        <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 2v6h3l-4 4-4-4h3V2h2zm-2 8H9v10h6V10h-2z"/>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-blue-800 mb-1">Download Template Excel</p>
+                            <p class="text-xs text-blue-600 mb-3">Gunakan template ini untuk memudahkan import data user</p>
+                            <a href="/admin/users/template" class="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
+                                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Download Template
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Form -->
+                <form action="/admin/users/import" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">File Excel (.xlsx)</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-primary transition-colors">
+                            <input type="file" name="file" accept=".xlsx" required 
+                                class="hidden" id="fileInput" onchange="updateFileName(this)">
+                            <label for="fileInput" class="cursor-pointer">
+                                <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                <p class="text-sm text-gray-600" id="fileName">Klik untuk pilih file Excel</p>
+                                <p class="text-xs text-gray-400 mt-1">Format: .xlsx (maksimal 5MB)</p>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Format Info -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                        <p class="text-xs font-medium text-amber-800 mb-2">📋 Format Excel:</p>
+                        <ul class="text-xs text-amber-700 space-y-1">
+                            <li>• Kolom: Username | Email | Password | Nama Lengkap | Kelas</li>
+                            <li>• Baris pertama adalah header (akan diabaikan)</li>
+                            <li>• Password akan di-hash otomatis</li>
+                            <li>• User yang sudah ada akan dilewati</li>
+                        </ul>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-medium hover:shadow-lg transition-all">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        Upload & Import
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         function toggleModal() {
             const modal = document.getElementById('addModal');
@@ -155,6 +254,22 @@
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }
+        }
+
+        function toggleImportModal() {
+            const modal = document.getElementById('importModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function updateFileName(input) {
+            const fileName = input.files[0]?.name || 'Klik untuk pilih file Excel';
+            document.getElementById('fileName').textContent = fileName;
         }
     </script>
 

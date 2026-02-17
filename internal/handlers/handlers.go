@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -13,6 +14,7 @@ import (
 	"github.com/ramadhan/amaliah-monitoring/internal/repository"
 	"github.com/ramadhan/amaliah-monitoring/internal/services"
 	"github.com/ramadhan/amaliah-monitoring/internal/utils"
+	"github.com/xuri/excelize/v2"
 )
 
 type Handler struct {
@@ -114,6 +116,81 @@ func (h *Handler) ShowJadwal(c echo.Context) error {
 	}
 
 	return c.Render(http.StatusOK, "jadwal.html", data)
+}
+
+// Jadwal Shalat & Imsakiyah - Protected Page for Logged-in Users
+func (h *Handler) ShowUserJadwal(c echo.Context) error {
+	user := c.Get("user").(*models.User)
+
+	// Get location from query params or use user's saved location
+	provinsi := c.QueryParam("provinsi")
+	kabkota := c.QueryParam("kabkota")
+	tab := c.QueryParam("tab")
+	if tab == "" {
+		tab = "shalat"
+	}
+
+	// Use user's saved location if not provided in query
+	if provinsi == "" && user.Provinsi != "" {
+		provinsi = user.Provinsi
+	}
+	if kabkota == "" && user.Kabkota != "" {
+		kabkota = user.Kabkota
+	}
+
+	provinsiList, _ := h.ShalatService.GetProvinsi()
+
+	var kabkotaList []string
+	if provinsi != "" {
+		kabkotaList, _ = h.ShalatService.GetKabkota(provinsi)
+	}
+
+	var shalatData *models.ShalatData
+	var imsakiyahData *models.ImsakiyahData
+	var todayShalat *models.ShalatSchedule
+	var todayImsakiyah *models.ImsakiyahSchedule
+
+	if provinsi != "" && kabkota != "" {
+		now := time.Now()
+		shalatData, _ = h.ShalatService.GetShalat(provinsi, kabkota, int(now.Month()), now.Year())
+		imsakiyahData, _ = h.ImsakiyahService.GetImsakiyah(provinsi, kabkota)
+
+		if shalatData != nil {
+			dayOfMonth := now.Day()
+			for _, s := range shalatData.Jadwal {
+				if s.Tanggal == dayOfMonth {
+					todayShalat = &s
+					break
+				}
+			}
+		}
+
+		if imsakiyahData != nil {
+			dayOfMonth := now.Day()
+			for _, s := range imsakiyahData.Imsakiyah {
+				if s.Tanggal == dayOfMonth {
+					todayImsakiyah = &s
+					break
+				}
+			}
+		}
+	}
+
+	data := map[string]interface{}{
+		"Title":          "Jadwal Shalat & Imsakiyah",
+		"User":           user,
+		"Provinsi":       provinsi,
+		"Kabkota":        kabkota,
+		"ProvinsiList":   provinsiList,
+		"KabkotaList":    kabkotaList,
+		"Tab":            tab,
+		"ShalatData":     shalatData,
+		"ImsakiyahData":  imsakiyahData,
+		"TodayShalat":    todayShalat,
+		"TodayImsakiyah": todayImsakiyah,
+	}
+
+	return c.Render(http.StatusOK, "user/jadwal.html", data)
 }
 
 // Auth Handlers
@@ -724,9 +801,11 @@ func (h *Handler) ManageUsers(c echo.Context) error {
 	users, _ := h.UserRepo.GetAll()
 
 	return c.Render(http.StatusOK, "admin/users.html", map[string]interface{}{
-		"Title": "Kelola Siswa",
-		"User":  user,
-		"Users": users,
+		"Title":   "Kelola Siswa",
+		"User":    user,
+		"Users":   users,
+		"Success": c.QueryParam("success"),
+		"Error":   c.QueryParam("error"),
 	})
 }
 
@@ -755,6 +834,153 @@ func (h *Handler) CreateUser(c echo.Context) error {
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/admin/users")
+}
+
+// Download Template Excel untuk Import User
+func (h *Handler) DownloadUserTemplate(c echo.Context) error {
+	f := excelize.NewFile()
+	defer f.Close()
+
+	// Create sheet
+	sheetName := "Template User"
+	index, _ := f.NewSheet(sheetName)
+	f.SetActiveSheet(index)
+
+	// Set headers
+	headers := []string{"Username", "Email", "Password", "Nama Lengkap", "Kelas"}
+	for i, header := range headers {
+		cell := string(rune('A'+i)) + "1"
+		f.SetCellValue(sheetName, cell, header)
+	}
+
+	// Add sample data
+	f.SetCellValue(sheetName, "A2", "ahmad123")
+	f.SetCellValue(sheetName, "B2", "ahmad@example.com")
+	f.SetCellValue(sheetName, "C2", "password123")
+	f.SetCellValue(sheetName, "D2", "Ahmad Fauzi")
+	f.SetCellValue(sheetName, "E2", "XII IPA 1")
+
+	// Style header
+	style, _ := f.NewStyle(&excelize.Style{
+		Font:      &excelize.Font{Bold: true, Color: "FFFFFF"},
+		Fill:      excelize.Fill{Type: "pattern", Color: []string{"0D7E5E"}, Pattern: 1},
+		Alignment: &excelize.Alignment{Horizontal: "center", Vertical: "center"},
+	})
+	f.SetCellStyle(sheetName, "A1", "E1", style)
+
+	// Set column widths
+	f.SetColWidth(sheetName, "A", "A", 15)
+	f.SetColWidth(sheetName, "B", "B", 25)
+	f.SetColWidth(sheetName, "C", "C", 15)
+	f.SetColWidth(sheetName, "D", "D", 25)
+	f.SetColWidth(sheetName, "E", "E", 15)
+
+	// Set content type and send file
+	c.Response().Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=template_user.xlsx")
+
+	return f.Write(c.Response().Writer)
+}
+
+// Import User dari Excel
+func (h *Handler) ImportUsers(c echo.Context) error {
+	// Get uploaded file
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=File tidak ditemukan")
+	}
+
+	// Open file
+	src, err := file.Open()
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=Gagal membuka file")
+	}
+	defer src.Close()
+
+	// Read Excel file
+	f, err := excelize.OpenReader(src)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=File Excel tidak valid")
+	}
+	defer f.Close()
+
+	// Get sheet name
+	sheetName := f.GetSheetName(0)
+	if sheetName == "" {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=Sheet tidak ditemukan")
+	}
+
+	// Get all rows
+	rows, err := f.GetRows(sheetName)
+	if err != nil || len(rows) < 2 {
+		return c.Redirect(http.StatusSeeOther, "/admin/users?error=Data tidak valid")
+	}
+
+	// Process each row (skip header)
+	successCount := 0
+	errorCount := 0
+	var errors []string
+
+	for i, row := range rows {
+		if i == 0 { // Skip header
+			continue
+		}
+
+		// Validate row has enough columns
+		if len(row) < 5 {
+			errorCount++
+			errors = append(errors, fmt.Sprintf("Baris %d: Data tidak lengkap", i+1))
+			continue
+		}
+
+		username := strings.TrimSpace(row[0])
+		email := strings.TrimSpace(row[1])
+		password := strings.TrimSpace(row[2])
+		fullName := strings.TrimSpace(row[3])
+		class := strings.TrimSpace(row[4])
+
+		// Validate required fields
+		if username == "" || email == "" || password == "" || fullName == "" {
+			errorCount++
+			errors = append(errors, fmt.Sprintf("Baris %d: Field wajib kosong", i+1))
+			continue
+		}
+
+		// Hash password
+		hashedPassword, err := utils.HashPassword(password)
+		if err != nil {
+			errorCount++
+			errors = append(errors, fmt.Sprintf("Baris %d: Gagal hash password", i+1))
+			continue
+		}
+
+		// Create user
+		user := &models.User{
+			Username:     username,
+			Email:        email,
+			PasswordHash: hashedPassword,
+			FullName:     fullName,
+			Class:        class,
+			Role:         "user",
+			Points:       0,
+		}
+
+		if err := h.UserRepo.Create(user); err != nil {
+			errorCount++
+			errors = append(errors, fmt.Sprintf("Baris %d: %s (mungkin sudah ada)", i+1, username))
+			continue
+		}
+
+		successCount++
+	}
+
+	// Prepare message
+	message := fmt.Sprintf("Berhasil import %d user", successCount)
+	if errorCount > 0 {
+		message += fmt.Sprintf(", %d gagal", errorCount)
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/admin/users?success="+message)
 }
 
 func (h *Handler) ShowReports(c echo.Context) error {
@@ -1294,4 +1520,17 @@ func (h *Handler) AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		c.Set("user", user)
 		return next(c)
 	}
+}
+
+// Error Handlers
+func (h *Handler) NotFound(c echo.Context) error {
+	return c.Render(http.StatusNotFound, "errors/404.html", map[string]interface{}{
+		"Title": "Halaman Tidak Ditemukan",
+	})
+}
+
+func (h *Handler) Forbidden(c echo.Context) error {
+	return c.Render(http.StatusForbidden, "errors/403.html", map[string]interface{}{
+		"Title": "Akses Ditolak",
+	})
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -22,6 +23,27 @@ func main() {
 
 	// Setup Template Renderer
 	e.Renderer = config.NewTemplateRenderer()
+
+	// Custom HTTP Error Handler
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		code := http.StatusInternalServerError
+		if he, ok := err.(*echo.HTTPError); ok {
+			code = he.Code
+		}
+
+		switch code {
+		case http.StatusNotFound:
+			c.Render(code, "errors/404.html", map[string]interface{}{
+				"Title": "Halaman Tidak Ditemukan",
+			})
+		case http.StatusForbidden:
+			c.Render(code, "errors/403.html", map[string]interface{}{
+				"Title": "Akses Ditolak",
+			})
+		default:
+			e.DefaultHTTPErrorHandler(err, c)
+		}
+	}
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -47,6 +69,10 @@ func main() {
 	// Routes
 	e.GET("/", h.Home)
 
+	// PWA Routes
+	e.File("/manifest.json", "web/static/manifest.json")
+	e.File("/sw.js", "web/static/sw.js")
+
 	// Public Routes - Jadwal Shalat & Imsakiyah
 	e.GET("/jadwal", h.ShowJadwal)
 	e.GET("/api/kabkota", h.GetKabkotaAPI)
@@ -54,14 +80,13 @@ func main() {
 	// Auth Routes
 	e.GET("/login", h.ShowLogin)
 	e.POST("/login", h.Login)
-	e.GET("/register", h.ShowRegister)
-	e.POST("/register", h.Register)
 	e.GET("/logout", h.Logout)
 
 	// Protected Routes Group
 	user := e.Group("/user")
 	user.Use(h.AuthMiddleware)
 	user.GET("/dashboard", h.UserDashboard)
+	user.GET("/jadwal", h.ShowUserJadwal)
 	user.GET("/prayers", h.ShowPrayers)
 	user.POST("/prayers", h.SavePrayers)
 	user.GET("/fasting", h.ShowFasting)
@@ -83,7 +108,6 @@ func main() {
 	user.POST("/profile/change-password", h.ChangePassword)
 
 	// API Routes (protected)
-	user.GET("/api/kabkota", h.GetKabkotaAPI)
 	user.GET("/api/imsakiyah", h.GetImsakiyahAPI)
 
 	// Admin Routes Group
@@ -93,6 +117,8 @@ func main() {
 	admin.GET("/users", h.ManageUsers)
 	admin.POST("/users", h.CreateUser)
 	admin.GET("/users/search", h.SearchUsers)
+	admin.GET("/users/template", h.DownloadUserTemplate)
+	admin.POST("/users/import", h.ImportUsers)
 	admin.GET("/users/edit/:id", h.EditUser)
 	admin.POST("/users/update/:id", h.UpdateUser)
 	admin.GET("/users/delete/:id", h.DeleteUser)
@@ -100,6 +126,12 @@ func main() {
 	admin.GET("/reports", h.ShowReports)
 	admin.GET("/reports/generate", h.GenerateReport)
 	admin.GET("/statistics", h.ShowStatistics)
+
+	// Error Routes
+	e.GET("/403", h.Forbidden)
+
+	// Catch-all route for 404 (must be last)
+	e.RouteNotFound("/*", h.NotFound)
 
 	// Start Server
 	port := os.Getenv("APP_PORT")

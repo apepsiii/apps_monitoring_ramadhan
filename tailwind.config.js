@@ -54,7 +54,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Cairo', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        arabic: ['Amiri', 'serif'],
+        arabic: ['LPMQ IsepMisbah', 'Amiri', 'serif'],
         display: ['Cairo', 'Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {

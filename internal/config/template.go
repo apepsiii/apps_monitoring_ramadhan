@@ -71,14 +71,14 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 	if err != nil {
 		return err
 	}
-	
+
 	// Parse the specific template file
 	filePath := "web/templates/" + name
 	tmpl, err = tmpl.ParseFiles(filePath)
 	if err != nil {
 		return err
 	}
-	
+
 	// Execute the base template
 	return tmpl.ExecuteTemplate(w, "base.html", data)
 }

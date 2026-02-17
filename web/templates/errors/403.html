@@ -1,0 +1,59 @@
+{{define "content"}}
+<div class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+    <div class="text-center">
+        <div class="mb-8">
+            <div class="w-32 h-32 mx-auto bg-gradient-primary rounded-full flex items-center justify-center shadow-card">
+                <span class="text-6xl font-bold text-white">403</span>
+            </div>
+        </div>
+        
+        <p class="font-arabic text-2xl text-primary-600 mb-2">
+            مَنْع
+        </p>
+        
+        <h1 class="text-2xl font-bold text-gray-900 mb-3">
+            Akses Ditolak
+        </h1>
+        
+        <p class="text-gray-600 mb-8 max-w-xs mx-auto">
+            Maaf, Anda tidak memiliki izin untuk mengakses halaman ini. Silakan login dengan akun yang sesuai.
+        </p>
+        
+        <div class="space-y-3">
+            <a href="/login" class="btn-primary-gradient inline-block">
+                <span class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                    </svg>
+                    Login
+                </span>
+            </a>
+            
+            <a href="/" class="btn-ghost inline-block">
+                <span class="flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Kembali ke Beranda
+                </span>
+            </a>
+        </div>
+        
+        <div class="mt-12 flex items-center justify-center gap-4 text-primary-300">
+            <div class="w-16 h-px bg-gradient-to-r from-transparent to-primary-200"></div>
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+            </svg>
+            <div class="w-16 h-px bg-gradient-to-l from-transparent to-primary-200"></div>
+        </div>
+        
+        <p class="mt-4 text-sm text-gray-500">
+            "Sesungguhnya Allah menyukai orang-orang yang bertobat"
+        </p>
+        <p class="text-xs text-gray-400 font-arabic">
+            QS. Al-Baqarah: 222
+        </p>
+    </div>
+</div>
+{{end}}
