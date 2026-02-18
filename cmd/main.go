@@ -168,6 +168,7 @@ func runApplication() {
 	user.GET("/profile", h.ShowProfile)
 	user.POST("/profile", h.UpdateProfile)
 	user.POST("/profile/change-password", h.ChangePassword)
+	user.GET("/certificate", h.DownloadCertificate)
 
 	// API Routes (protected)
 	user.GET("/api/imsakiyah", h.GetImsakiyahAPI)

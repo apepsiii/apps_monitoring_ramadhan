@@ -45,11 +45,26 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-gray-500 text-sm">Total Tilawah</p>
-                    <h2 class="text-2xl font-bold text-gray-800">{{.TotalReadings}} Kali</h2>
+                    <h2 class="text-2xl font-bold text-gray-800">{{.TotalReadings}} Kali <span class="text-sm font-normal text-gray-500">({{.TotalPages}} Hal)</span></h2>
                     <p class="text-xs text-gray-500 mt-2 italic font-arabic">"وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا"</p>
                 </div>
                 <div class="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-card">
                     <span class="text-2xl">📖</span>
+                </div>
+            </div>
+            
+            <!-- Progress Khatam -->
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <div class="flex justify-between text-sm mb-1">
+                    <span class="text-gray-600">Progress Khatam</span>
+                    <span class="font-bold text-primary">{{.ProgressPercent}}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-primary h-2.5 rounded-full" style="width: {{.ProgressPercent}}%"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>Target Harian: <strong>{{.TargetDailyPages}} Hal</strong></span>
+                    <span>Hari Ini: <strong>{{.TodayPages}} Hal</strong></span>
                 </div>
             </div>
         </div>
@@ -117,11 +132,17 @@
                             <input type="hidden" name="end_surah_name" id="endSurahName" value="">
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Ayat</label>
-                            <input type="number" name="end_ayah" id="endAyah" min="1" class="input-field" placeholder="Contoh: 7" required>
-                            <p class="text-xs text-gray-500 mt-1" id="endAyahInfo"></p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Ayat</label>
+                                <input type="number" name="end_ayah" id="endAyah" min="1" class="input-field" placeholder="Contoh: 7" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Jumlah Halaman</label>
+                                <input type="number" name="pages" id="pages" min="1" class="input-field" placeholder="Estimasi">
+                            </div>
                         </div>
+                        <p class="text-xs text-gray-500 mt-1" id="endAyahInfo"></p>
                     </div>
                 </div>
 

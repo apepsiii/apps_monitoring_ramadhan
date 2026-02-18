@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/ramadhan/amaliah-monitoring/internal/models"
 	"github.com/ramadhan/amaliah-monitoring/internal/services"
 )
 

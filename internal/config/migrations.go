@@ -180,6 +180,11 @@ func RunMigrations(db *sql.DB) error {
 		log.Printf("Failed to seed admin user: %v", err)
 	}
 
+	// Add pages column to quran_readings
+	if err := addColumnIfNotExists(db, "quran_readings", "pages", "INTEGER DEFAULT 0"); err != nil {
+		log.Printf("Note: %v", err)
+	}
+
 	return nil
 }
 

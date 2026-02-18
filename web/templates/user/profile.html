@@ -7,11 +7,18 @@
                     <h1 class="text-xl font-bold">Profil Saya</h1>
                     <p class="text-white/80 text-sm">Personalisasi & Customisasi</p>
                 </div>
-                <a href="/user/dashboard" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </a>
+                <div class="flex gap-2">
+                    <a href="/user/certificate" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all" title="Download Sertifikat">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </a>
+                    <a href="/user/dashboard" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-all" title="Kembali">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </a>
+                </div>
             </div>
         </div>
     </header>
@@ -198,7 +205,7 @@
                 return;
             }
             
-            fetch('/user/api/kabkota?provinsi=' + encodeURIComponent(provinsi))
+            fetch('/api/kabkota?provinsi=' + encodeURIComponent(provinsi))
                 .then(response => response.json())
                 .then(data => {
                     const select = document.getElementById('kabkota');

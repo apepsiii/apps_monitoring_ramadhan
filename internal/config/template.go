@@ -37,7 +37,25 @@ func NewTemplateRenderer(embedFS fs.FS) *TemplateRenderer {
 			return days[int(t.Weekday())]
 		},
 		"formatDateLong": func(date string) string {
-			t, _ := time.Parse("2006-01-02", date)
+			if date == "" {
+				return "-"
+			}
+			// Try parsing multiple formats
+			formats := []string{"2006-01-02", "2006-01-02T15:04:05Z07:00", "2006-01-02 15:04:05"}
+			var t time.Time
+			var err error
+			
+			for _, format := range formats {
+				t, err = time.Parse(format, date)
+				if err == nil {
+					break
+				}
+			}
+			
+			if err != nil {
+				return date // Return original string if parse fails
+			}
+			
 			months := []string{"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
 			days := []string{"Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"}
 			return days[int(t.Weekday())] + ", " + strconv.Itoa(t.Day()) + " " + months[t.Month()-1] + " " + strconv.Itoa(t.Year())

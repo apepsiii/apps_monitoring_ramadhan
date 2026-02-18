@@ -73,42 +73,25 @@
     </header>
 
     <main class="px-5 -mt-2 space-y-4">
-        <div class="grid grid-cols-3 gap-3">
-            <div class="card-soft text-center py-4">
-                {{if gt .Streak.PrayerStreak 0}}
-                <div class="flex items-center justify-center gap-1 mb-1">
-                    <span class="text-base">🔥</span>
+        <!-- Stats Trigger Button -->
+        <div class="card-soft hover:bg-primary-50 transition-colors cursor-pointer group" onclick="openStatsModal()">
+            <div class="flex items-center justify-between p-2">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary text-primary group-hover:text-white transition-all duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg">Statistik Ibadah</h3>
+                        <p class="text-xs text-gray-500">Lihat progress & pencapaianmu</p>
+                    </div>
                 </div>
-                {{end}}
-                <p class="text-2xl font-bold text-primary">{{.Streak.PrayerStreak}}</p>
-                <p class="text-xs text-gray-500 mt-1">Shalat</p>
-                {{if gt .Streak.BestPrayer 0}}
-                <p class="text-xs text-accent font-medium">Best: {{.Streak.BestPrayer}}</p>
-                {{end}}
-            </div>
-            <div class="card-soft text-center py-4">
-                {{if gt .Streak.FastingStreak 0}}
-                <div class="flex items-center justify-center gap-1 mb-1">
-                    <span class="text-base">🔥</span>
+                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
                 </div>
-                {{end}}
-                <p class="text-2xl font-bold text-primary">{{.Streak.FastingStreak}}</p>
-                <p class="text-xs text-gray-500 mt-1">Puasa</p>
-                {{if gt .Streak.BestFasting 0}}
-                <p class="text-xs text-accent font-medium">Best: {{.Streak.BestFasting}}</p>
-                {{end}}
-            </div>
-            <div class="card-soft text-center py-4">
-                {{if gt .Streak.QuranStreak 0}}
-                <div class="flex items-center justify-center gap-1 mb-1">
-                    <span class="text-base">🔥</span>
-                </div>
-                {{end}}
-                <p class="text-2xl font-bold text-accent">{{.Streak.QuranStreak}}</p>
-                <p class="text-xs text-gray-500 mt-1">Quran</p>
-                {{if gt .Streak.BestQuran 0}}
-                <p class="text-xs text-primary font-medium">Best: {{.Streak.BestQuran}}</p>
-                {{end}}
             </div>
         </div>
 
@@ -167,69 +150,7 @@
             </div>
         </div>
 
-        <div class="card-soft">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-gray-800">Progress Hari Ini</h3>
-                <span class="text-xs text-gray-500">{{.PrayerCompleted}}/5 selesai</span>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <div class="flex justify-between text-sm mb-2">
-                        <span class="text-gray-600">Shalat 5 Waktu</span>
-                        <span class="font-semibold text-primary">{{.PrayerCompleted}}/5</span>
-                    </div>
-                    <div class="w-full bg-gray-100 rounded-full h-2.5">
-                        <div class="bg-gradient-primary h-2.5 rounded-full transition-all duration-500" style="width: {{multiply (divide .PrayerCompleted 5.0) 100}}%"></div>
-                    </div>
-                </div>
 
-                <div>
-                    <div class="flex justify-between text-sm mb-2">
-                        <span class="text-gray-600">Status Puasa</span>
-                        <span class="font-semibold {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}text-primary{{else}}text-red-500{{end}}{{else}}text-gray-400{{end}}">
-                            {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}✓ Puasa{{else}}✗ Tidak{{end}}{{else}}Belum diisi{{end}}
-                        </span>
-                    </div>
-                    <div class="w-full bg-gray-100 rounded-full h-2.5">
-                        <div class="h-2.5 rounded-full transition-all duration-500 {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}bg-gradient-primary{{else}}bg-red-400{{end}}{{else}}bg-gray-300{{end}}" style="width: 100%"></div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="flex justify-between text-sm mb-2">
-                        <span class="text-gray-600">Bacaan Quran</span>
-                        <span class="font-semibold text-accent">{{.TotalReadings}}x</span>
-                    </div>
-                    <div class="w-full bg-gray-100 rounded-full h-2.5">
-                        <div class="bg-gradient-accent h-2.5 rounded-full transition-all duration-500" style="width: {{if gt .TotalReadings 0}}100%{{else}}0%{{end}}"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card-soft">
-            <h3 class="font-semibold text-gray-800 mb-4">Pencapaian Saya</h3>
-            {{if .UserBadges}}
-            <div class="grid grid-cols-4 gap-2">
-                {{range .UserBadges}}
-                <div class="text-center p-2">
-                    <div class="w-12 h-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-yellow-100 to-amber-100 flex items-center justify-center border-2 border-amber-200">
-                        <span class="text-xl">
-                            {{if eq .Badge.Icon "star"}}⭐{{else if eq .Badge.Icon "fire"}}🔥{{else if eq .Badge.Icon "award"}}🏅{{else if eq .Badge.Icon "book-open"}}📖{{else if eq .Badge.Icon "book"}}📚{{else if eq .Badge.Icon "check-circle"}}✅{{else if eq .Badge.Icon "heart"}}❤️{{else if eq .Badge.Icon "sun"}}☀️{{else if eq .Badge.Icon "trophy"}}🏆{{else}}🏅{{end}}
-                        </span>
-                    </div>
-                    <p class="text-[10px] font-medium text-gray-700 leading-tight">{{.Badge.Name}}</p>
-                </div>
-                {{end}}
-            </div>
-            {{else}}
-            <div class="text-center py-4 bg-gray-50 rounded-xl">
-                <span class="text-2xl grayscale opacity-50">🏆</span>
-                <p class="text-xs text-gray-400 mt-2">Belum ada pencapaian. Terus semangat!</p>
-            </div>
-            {{end}}
-        </div>
 
         <div class="card-soft">
             <h3 class="font-semibold text-gray-800 mb-4">Materi Islami</h3>
@@ -391,4 +312,181 @@
     </script>
     {{end}}
 </div>
+    <!-- Stats Modal Popup (Bottom Sheet) -->
+    <div id="statsModal" class="fixed inset-0 bg-black/60 z-50 hidden items-end justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-t-3xl w-full max-w-md max-h-[90vh] overflow-y-auto transform translate-y-full transition-transform duration-300 stats-modal-content relative shadow-2xl">
+            
+            <div class="sticky top-0 bg-white z-20 pt-4 pb-2 px-6 border-b border-gray-50">
+                <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800">Statistik Ibadah</h3>
+                        <p class="text-xs text-gray-500">Overview aktivitas & pencapaian</p>
+                    </div>
+                    <button onclick="closeStatsModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="p-6">
+
+
+                <!-- Grid Stats (Points & Badges) -->
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-primary/5 p-4 rounded-2xl border border-primary/10 relative overflow-hidden">
+                        <div class="relative z-10">
+                            <p class="text-xs font-semibold text-primary mb-1">Total Poin</p>
+                            <p class="text-3xl font-bold text-gray-800">{{.User.Points}}</p>
+                        </div>
+                        <svg class="absolute -bottom-2 -right-2 w-16 h-16 text-primary/10" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z"/></svg>
+                    </div>
+                    <div class="bg-accent/5 p-4 rounded-2xl border border-accent/10 relative overflow-hidden">
+                        <div class="relative z-10">
+                             <p class="text-xs font-semibold text-accent mb-1">Badges</p>
+                             <p class="text-3xl font-bold text-gray-800">{{len .UserBadges}}</p>
+                        </div>
+                         <svg class="absolute -bottom-2 -right-2 w-16 h-16 text-accent/10" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                    </div>
+                </div>
+
+                <!-- Overall Progress Visualization -->
+                <div class="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="font-semibold text-gray-800 text-sm">Aktivitas Mingguan</h4>
+                        <span class="text-xs bg-white px-2 py-1 rounded-md border text-gray-500">7 Hari</span>
+                    </div>
+                    <div class="flex justify-between items-end h-24 gap-2">
+                        <!-- Static bars purely for visual aesthetics as per request design -->
+                        <div class="flex-1 bg-white rounded-full h-full relative overflow-hidden shadow-sm"><div class="absolute bottom-0 w-full bg-primary/80" style="height: 40%"></div></div>
+                        <div class="flex-1 bg-white rounded-full h-full relative overflow-hidden shadow-sm"><div class="absolute bottom-0 w-full bg-primary/80" style="height: 70%"></div></div>
+                        <div class="flex-1 bg-white rounded-full h-full relative overflow-hidden shadow-sm"><div class="absolute bottom-0 w-full bg-accent/80" style="height: 50%"></div></div>
+                        <div class="flex-1 bg-white rounded-full h-full relative overflow-hidden shadow-sm"><div class="absolute bottom-0 w-full bg-primary/80" style="height: 85%"></div></div>
+                        <div class="flex-1 bg-white rounded-full h-full relative overflow-hidden shadow-sm"><div class="absolute bottom-0 w-full bg-primary/80" style="height: 60%"></div></div>
+                        <div class="flex-1 bg-white rounded-full h-full relative overflow-hidden shadow-sm"><div class="absolute bottom-0 w-full bg-primary" style="height: 90%"></div></div>
+                        <div class="flex-1 bg-white rounded-full h-full relative overflow-hidden shadow-sm"><div class="absolute bottom-0 w-full bg-primary/40" style="height: 30%"></div></div>
+                    </div>
+                </div>
+
+                <!-- Progress Harian -->
+                <div class="space-y-4 mb-6">
+                    <h4 class="font-bold text-gray-800">Progress Hari Ini</h4>
+                    
+                    <!-- Shalat -->
+                    <div class="bg-white p-3 border rounded-xl shadow-sm">
+                        <div class="flex justify-between text-sm mb-2 font-medium">
+                            <span class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center text-primary text-xs">🕌</span>
+                                Shalat
+                            </span>
+                            <span class="text-primary font-bold">{{.PrayerCompleted}}/5</span>
+                        </div>
+                        <div class="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-1000" style="width: {{multiply (divide .PrayerCompleted 5.0) 100}}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Puasa -->
+                    <div class="bg-white p-3 border rounded-xl shadow-sm">
+                        <div class="flex justify-between text-sm mb-2 font-medium">
+                             <span class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-md bg-accent/10 flex items-center justify-center text-accent text-xs">🍽️</span>
+                                Puasa
+                            </span>
+                            <span class="{{if .Fasting}}{{if eq .Fasting.Status "puasa"}}text-green-600{{else}}text-red-500{{end}}{{else}}text-gray-400{{end}} font-bold">
+                                {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}Berpuasa{{else}}Tidak{{end}}{{else}}-{{end}}
+                            </span>
+                        </div>
+                        <div class="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                             <div class="h-full {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}bg-green-500{{else}}bg-red-400{{end}}{{else}}bg-gray-200{{end}} rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                     <!-- Quran -->
+                    <div class="bg-white p-3 border rounded-xl shadow-sm">
+                        <div class="flex justify-between text-sm mb-2 font-medium">
+                            <span class="flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-md bg-teal-500/10 flex items-center justify-center text-teal-600 text-xs">📖</span>
+                                Quran
+                            </span>
+                            <span class="text-teal-600 font-bold">{{.TotalReadings}}x</span>
+                        </div>
+                        <div class="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-teal-500 rounded-full transition-all duration-1000" style="width: {{if gt .TotalReadings 0}}100%{{else}}5%{{end}}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Badges List -->
+                <div>
+                     <h4 class="font-bold text-gray-800 mb-3">Koleksi Badge</h4>
+                     {{if .UserBadges}}
+                     <div class="grid grid-cols-3 gap-3">
+                        {{range .UserBadges}}
+                        <div class="bg-gradient-to-br from-yellow-50 to-amber-50 border border-amber-100 rounded-xl p-3 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+                            <!-- Shine Effect -->
+                            <div class="absolute inset-0 bg-white/40 translate-y-full group-hover:translate-y-0 transition-transform duration-500 rounded-xl"></div>
+                            
+                            <div class="relative z-10">
+                                <span class="text-3xl mb-1 block filter drop-shadow-sm">
+                                    {{if eq .Badge.Icon "star"}}⭐{{else if eq .Badge.Icon "fire"}}🔥{{else if eq .Badge.Icon "award"}}🏅{{else if eq .Badge.Icon "book-open"}}📖{{else}}🏆{{end}}
+                                </span>
+                                <div class="font-black text-xl text-amber-600 leading-none mb-1">{{.Badge.CriteriaValue}}</div>
+                                <div class="text-[10px] uppercase tracking-wider font-bold text-amber-800/70 leading-tight">{{.Badge.Name}}</div>
+                            </div>
+                        </div>
+                        {{end}}
+                     </div>
+                     {{else}}
+                      <div class="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <p class="text-sm text-gray-400">Belum ada badge yang diraih.</p>
+                        <p class="text-xs text-primary mt-1">Selesaikan ibadah untuk dapat badge!</p>
+                      </div>
+                     {{end}}
+                </div>
+
+                <div class="mt-8">
+                    <button onclick="closeStatsModal()" class="w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all shadow-lg shadow-gray-200">
+                        Tutup Statistik
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openStatsModal() {
+            const modal = document.getElementById('statsModal');
+            const content = modal.querySelector('.stats-modal-content');
+            modal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before opacity transition
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.classList.add('flex');
+                content.classList.remove('translate-y-full');
+                content.classList.add('translate-y-0');
+            }, 10);
+        }
+
+        function closeStatsModal() {
+            const modal = document.getElementById('statsModal');
+            const content = modal.querySelector('.stats-modal-content');
+            
+            modal.classList.add('opacity-0');
+            content.classList.remove('translate-y-0');
+            content.classList.add('translate-y-full');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        // Close when clicking background
+        document.getElementById('statsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeStatsModal();
+            }
+        });
+    </script>
 {{end}}

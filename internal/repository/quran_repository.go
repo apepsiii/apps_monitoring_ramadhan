@@ -16,11 +16,11 @@ func NewQuranRepository(db *sql.DB) *QuranRepository {
 }
 
 func (r *QuranRepository) Create(reading *models.QuranReading) error {
-	query := `INSERT INTO quran_readings (user_id, date, start_surah_id, start_surah_name, start_ayah, end_surah_id, end_surah_name, end_ayah, notes)
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	query := `INSERT INTO quran_readings (user_id, date, start_surah_id, start_surah_name, start_ayah, end_surah_id, end_surah_name, end_ayah, pages, notes)
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	result, err := r.DB.Exec(query, reading.UserID, reading.Date, reading.StartSurahID,
-		reading.StartSurahName, reading.StartAyah, reading.EndSurahID, reading.EndSurahName, reading.EndAyah, reading.Notes)
+		reading.StartSurahName, reading.StartAyah, reading.EndSurahID, reading.EndSurahName, reading.EndAyah, reading.Pages, reading.Notes)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (r *QuranRepository) Create(reading *models.QuranReading) error {
 }
 
 func (r *QuranRepository) GetByUserAndDate(userID int, date string) ([]*models.QuranReading, error) {
-	query := `SELECT id, user_id, date, start_surah_id, start_surah_name, start_ayah, end_surah_id, end_surah_name, end_ayah, notes, created_at
+	query := `SELECT id, user_id, date, start_surah_id, start_surah_name, start_ayah, end_surah_id, end_surah_name, end_ayah, pages, notes, created_at
 			  FROM quran_readings WHERE user_id = ? AND date = ? ORDER BY created_at DESC`
 
 	rows, err := r.DB.Query(query, userID, date)
@@ -45,7 +45,7 @@ func (r *QuranRepository) GetByUserAndDate(userID int, date string) ([]*models.Q
 		reading := &models.QuranReading{}
 		err := rows.Scan(
 			&reading.ID, &reading.UserID, &reading.Date, &reading.StartSurahID, &reading.StartSurahName,
-			&reading.StartAyah, &reading.EndSurahID, &reading.EndSurahName, &reading.EndAyah, &reading.Notes, &reading.CreatedAt,
+			&reading.StartAyah, &reading.EndSurahID, &reading.EndSurahName, &reading.EndAyah, &reading.Pages, &reading.Notes, &reading.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -56,7 +56,7 @@ func (r *QuranRepository) GetByUserAndDate(userID int, date string) ([]*models.Q
 }
 
 func (r *QuranRepository) GetByUser(userID int, limit int) ([]*models.QuranReading, error) {
-	query := `SELECT id, user_id, date, start_surah_id, start_surah_name, start_ayah, end_surah_id, end_surah_name, end_ayah, notes, created_at
+	query := `SELECT id, user_id, date, start_surah_id, start_surah_name, start_ayah, end_surah_id, end_surah_name, end_ayah, pages, notes, created_at
 			  FROM quran_readings WHERE user_id = ? ORDER BY date DESC, created_at DESC LIMIT ?`
 
 	rows, err := r.DB.Query(query, userID, limit)
@@ -70,7 +70,7 @@ func (r *QuranRepository) GetByUser(userID int, limit int) ([]*models.QuranReadi
 		reading := &models.QuranReading{}
 		err := rows.Scan(
 			&reading.ID, &reading.UserID, &reading.Date, &reading.StartSurahID, &reading.StartSurahName,
-			&reading.StartAyah, &reading.EndSurahID, &reading.EndSurahName, &reading.EndAyah, &reading.Notes, &reading.CreatedAt,
+			&reading.StartAyah, &reading.EndSurahID, &reading.EndSurahName, &reading.EndAyah, &reading.Pages, &reading.Notes, &reading.CreatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -88,12 +88,11 @@ func (r *QuranRepository) GetTotalReadings(userID int) (int, error) {
 	return total, err
 }
 
-func (r *QuranRepository) GetTotalPagesRead(userID int, startDate, endDate string) (int, error) {
-	query := `SELECT COALESCE(SUM(pages), 0) FROM quran_readings 
-			  WHERE user_id = ? AND date BETWEEN ? AND ?`
+func (r *QuranRepository) GetTotalPagesRead(userID int) (int, error) {
+	query := `SELECT COALESCE(SUM(pages), 0) FROM quran_readings WHERE user_id = ?`
 
 	var total int
-	err := r.DB.QueryRow(query, userID, startDate, endDate).Scan(&total)
+	err := r.DB.QueryRow(query, userID).Scan(&total)
 	return total, err
 }
 

@@ -129,19 +129,13 @@
             {{if and .Provinsi .Kabkota}}
             {{if or .TodayShalat .TodayImsakiyah}}
             <div class="bg-white rounded-2xl card-shadow overflow-hidden">
-                <div class="flex border-b border-gray-100">
-                    <a href="/user/jadwal?provinsi={{.Provinsi}}&kabkota={{.Kabkota}}&tab=shalat" 
-                       class="flex-1 py-3 text-center text-sm font-medium tab-btn {{if eq .Tab `shalat`}}active{{else}}text-gray-600{{end}}">
-                        <span class="mr-1">🕌</span> Jadwal Shalat
-                    </a>
-                    <a href="/user/jadwal?provinsi={{.Provinsi}}&kabkota={{.Kabkota}}&tab=imsakiyah" 
-                       class="flex-1 py-3 text-center text-sm font-medium tab-btn {{if eq .Tab `imsakiyah`}}active{{else}}text-gray-600{{end}}">
-                        <span class="mr-1">🌙</span> Imsakiyah
-                    </a>
+                <div class="p-4 border-b border-gray-100">
+                    <h3 class="font-bold text-lg text-gray-800 flex items-center">
+                        <span class="mr-2">🕌</span> Jadwal Shalat
+                    </h3>
                 </div>
 
                 <div class="p-4">
-                    {{if eq .Tab "shalat"}}
                     {{if .TodayShalat}}
                     <div class="text-center mb-4">
                         <p class="text-gray-500 text-sm">{{.Kabkota}}, {{.Provinsi}}</p>
@@ -219,80 +213,7 @@
                     </div>
                     {{end}}
 
-                    {{else if eq .Tab "imsakiyah"}}
-                    {{if .TodayImsakiyah}}
-                    <div class="text-center mb-4">
-                        <p class="text-gray-500 text-sm">{{.Kabkota}}, {{.Provinsi}}</p>
-                        <p class="text-lg font-bold text-gray-800">Jadwal Imsakiyah</p>
-                        <p class="text-primary text-sm font-medium">{{.ImsakiyahData.Hijriah}}H / {{.ImsakiyahData.Masehi}}M</p>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="time-card bg-accent/10 rounded-xl p-3 text-center">
-                            <p class="text-xs text-gray-500 mb-1">Imsak</p>
-                            <p class="text-xl font-bold text-accent">{{.TodayImsakiyah.Imsak}}</p>
-                        </div>
-                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
-                            <p class="text-xs text-gray-500 mb-1">Subuh</p>
-                            <p class="text-xl font-bold text-primary">{{.TodayImsakiyah.Subuh}}</p>
-                        </div>
-                        <div class="time-card bg-gray-50 rounded-xl p-3 text-center">
-                            <p class="text-xs text-gray-500 mb-1">Terbit</p>
-                            <p class="text-xl font-bold text-gray-700">{{.TodayImsakiyah.Terbit}}</p>
-                        </div>
-                        <div class="time-card bg-gray-50 rounded-xl p-3 text-center">
-                            <p class="text-xs text-gray-500 mb-1">Dhuha</p>
-                            <p class="text-xl font-bold text-gray-700">{{.TodayImsakiyah.Dhuha}}</p>
-                        </div>
-                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
-                            <p class="text-xs text-gray-500 mb-1">Dzuhur</p>
-                            <p class="text-xl font-bold text-primary">{{.TodayImsakiyah.Dzuhur}}</p>
-                        </div>
-                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
-                            <p class="text-xs text-gray-500 mb-1">Ashar</p>
-                            <p class="text-xl font-bold text-primary">{{.TodayImsakiyah.Ashar}}</p>
-                        </div>
-                        <div class="time-card bg-accent/10 rounded-xl p-3 text-center">
-                            <p class="text-xs text-gray-500 mb-1">Maghrib</p>
-                            <p class="text-xl font-bold text-accent">{{.TodayImsakiyah.Maghrib}}</p>
-                        </div>
-                        <div class="time-card bg-primary/5 rounded-xl p-3 text-center">
-                            <p class="text-xs text-gray-500 mb-1">Isya</p>
-                            <p class="text-xl font-bold text-primary">{{.TodayImsakiyah.Isya}}</p>
-                        </div>
-                    </div>
-                    {{end}}
 
-                    {{if .ImsakiyahData}}
-                    <div class="mt-6">
-                        <h4 class="font-semibold text-gray-800 mb-3">Jadwal 30 Hari Ramadhan</h4>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm">
-                                <thead>
-                                    <tr class="bg-accent/10">
-                                        <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 rounded-l-lg">Hari</th>
-                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Imsak</th>
-                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Subuh</th>
-                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500">Maghrib</th>
-                                        <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 rounded-r-lg">Isya</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {{range .ImsakiyahData.Imsakiyah}}
-                                    <tr class="border-b border-gray-50">
-                                        <td class="px-2 py-2 font-medium">{{.Tanggal}}</td>
-                                        <td class="px-2 py-2 text-center text-accent font-medium">{{.Imsak}}</td>
-                                        <td class="px-2 py-2 text-center text-primary font-medium">{{.Subuh}}</td>
-                                        <td class="px-2 py-2 text-center text-accent font-medium">{{.Maghrib}}</td>
-                                        <td class="px-2 py-2 text-center text-primary font-medium">{{.Isya}}</td>
-                                    </tr>
-                                    {{end}}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    {{end}}
-                    {{end}}
                 </div>
             </div>
             {{else}}

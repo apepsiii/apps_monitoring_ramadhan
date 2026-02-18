@@ -3,7 +3,9 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
+	"math"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -31,6 +33,7 @@ type Handler struct {
 	BadgeRepo        *repository.BadgeRepository
 	BadgeService     *services.BadgeService
 	StatisticsService *services.StatisticsService
+	CertificateService *services.CertificateService
 	ClassRepo        *repository.ClassRepository
 }
 
@@ -58,6 +61,7 @@ func NewHandler(db *sql.DB) *Handler {
 		BadgeRepo:        badgeRepo,
 		BadgeService:     services.NewBadgeService(badgeRepo, prayerRepo, amaliahRepo, quranRepo),
 		StatisticsService: services.NewStatisticsService(prayerRepo, amaliahRepo, fastingRepo, userRepo),
+		CertificateService: services.NewCertificateService(),
 		ClassRepo:        classRepo,
 	}
 }
@@ -256,6 +260,10 @@ func (h *Handler) Login(c echo.Context) error {
 	cookie.Expires = time.Now().Add(24 * time.Hour)
 	cookie.Path = "/"
 	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteLaxMode
+	if os.Getenv("APP_ENV") == "production" {
+		cookie.Secure = true
+	}
 	c.SetCookie(cookie)
 
 	if user.Role == "admin" {
@@ -590,9 +598,22 @@ func (h *Handler) ShowQuran(c echo.Context) error {
 
 	// Get total readings count
 	totalReadings, _ := h.QuranRepo.GetTotalReadings(user.ID)
+	totalPages, _ := h.QuranRepo.GetTotalPagesRead(user.ID)
+
+	// Calculate Progress & Target
+	targetKhatamDays := user.TargetKhatam
+	if targetKhatamDays <= 0 {
+		targetKhatamDays = 30
+	}
+	targetDailyPages := float64(604) / float64(targetKhatamDays)
+	progressPercent := float64(totalPages) / 604.0 * 100
 
 	// Get today's readings
 	todayReadings, _ := h.QuranRepo.GetByUserAndDate(user.ID, todayStr)
+	todayPages := 0
+	for _, r := range todayReadings {
+		todayPages += r.Pages
+	}
 
 	// Get all surah from API for dropdown
 	surahList, _ := h.MuslimAPI.GetAllSurah()
@@ -603,15 +624,19 @@ func (h *Handler) ShowQuran(c echo.Context) error {
 	todayFormatted := days[int(today.Weekday())] + ", " + strconv.Itoa(today.Day()) + " " + months[today.Month()-1] + " " + strconv.Itoa(today.Year())
 
 	return c.Render(http.StatusOK, "user/quran.html", map[string]interface{}{
-		"Title":         "Al-Quran",
-		"User":          user,
-		"Readings":      readings,
-		"TotalReadings": totalReadings,
-		"TodayReadings": todayReadings,
-		"TodayDate":     todayFormatted,
-		"SurahList":     surahList,
-		"Error":         c.QueryParam("error"),
-		"Success":       c.QueryParam("success"),
+		"Title":            "Al-Quran",
+		"User":             user,
+		"Readings":         readings,
+		"TotalReadings":    totalReadings,
+		"TotalPages":       totalPages,
+		"ProgressPercent":  int(progressPercent),
+		"TargetDailyPages": int(math.Ceil(targetDailyPages)),
+		"TodayPages":       todayPages,
+		"TodayReadings":    todayReadings,
+		"TodayDate":        todayFormatted,
+		"SurahList":        surahList,
+		"Error":            c.QueryParam("error"),
+		"Success":          c.QueryParam("success"),
 	})
 }
 
@@ -624,6 +649,7 @@ func (h *Handler) SaveQuran(c echo.Context) error {
 	endSurahID, _ := strconv.Atoi(c.FormValue("end_surah_id"))
 	endSurahName := c.FormValue("end_surah_name")
 	endAyah, _ := strconv.Atoi(c.FormValue("end_ayah"))
+	pages, _ := strconv.Atoi(c.FormValue("pages"))
 	notes := c.FormValue("notes")
 
 	// Validation
@@ -655,6 +681,7 @@ func (h *Handler) SaveQuran(c echo.Context) error {
 		EndSurahID:     endSurahID,
 		EndSurahName:   endSurahName,
 		EndAyah:        endAyah,
+		Pages:          pages,
 		Notes:          notes,
 	}
 
@@ -1468,4 +1495,31 @@ func (h *Handler) Forbidden(c echo.Context) error {
 	return c.Render(http.StatusForbidden, "errors/403.html", map[string]interface{}{
 		"Title": "Akses Ditolak",
 	})
+}
+
+func (h *Handler) DownloadCertificate(c echo.Context) error {
+	user := c.Get("user").(*models.User)
+
+	// Gather Stats
+	totalPoints := user.Points
+	totalPages, _ := h.QuranRepo.GetTotalPagesRead(user.ID)
+	
+	progressPercent := float64(totalPages) / 604.0 * 100
+	
+	stats := map[string]interface{}{
+		"total_points": totalPoints,
+		"total_pages":  totalPages,
+		"khatam_percent": int(progressPercent),
+	}
+
+	pdfBytes, err := h.CertificateService.Generate(user, stats)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Failed to generate certificate: "+err.Error())
+	}
+
+	// Serve content
+	// Format: Sertifikat Amaliah Ramadhan_NAMASISWA
+	filename := fmt.Sprintf("Sertifikat Amaliah Ramadhan_%s.pdf", user.FullName)
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	return c.Blob(http.StatusOK, "application/pdf", pdfBytes)
 }

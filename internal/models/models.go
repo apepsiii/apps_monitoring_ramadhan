@@ -21,6 +21,15 @@ type User struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type Class struct {
+	ID          int       `json:"id"`
+	Name        string    `json:"name"`
+	Level       string    `json:"level"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 type ProfileUpdateRequest struct {
 	FullName     string `json:"full_name" form:"full_name"`
 	Email        string `json:"email" form:"email"`
@@ -71,6 +80,7 @@ type QuranReading struct {
 	EndSurahID     int       `json:"end_surah_id"`
 	EndSurahName   string    `json:"end_surah_name"`
 	EndAyah        int       `json:"end_ayah"`
+	Pages          int       `json:"pages"`
 	Notes          string    `json:"notes"`
 	CreatedAt      time.Time `json:"created_at"`
 }
