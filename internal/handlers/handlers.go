@@ -3,9 +3,11 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -266,7 +268,10 @@ func (h *Handler) Login(c echo.Context) error {
 	}
 	c.SetCookie(cookie)
 
-	if user.Role == "admin" {
+	// superadmin = system admin, goes to system admin panel
+	// admin = school admin, goes to user dashboard (where school management is)
+	// user = regular user, goes to user dashboard
+	if user.Role == "superadmin" {
 		return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
 	}
 	return c.Redirect(http.StatusSeeOther, "/user/dashboard")
@@ -299,14 +304,50 @@ func (h *Handler) Register(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to hash password"})
 	}
 
+	role := "user"
+	schoolID := 0
+
+	// Handle School Logic
+	if req.NewSchoolName != "" {
+		// Create New School
+		// Generate simple code: First word + random number? Or just random 6 chars
+		// For simplicity/robustness: Random 6 chars
+		schoolCode := utils.GenerateRandomString(6)
+
+		// Create School Entry
+		res, err := h.DB.Exec("INSERT INTO schools (name, code, address) VALUES (?, ?, ?)", req.NewSchoolName, schoolCode, "-")
+		if err != nil {
+			return c.Render(http.StatusOK, "auth/register.html", map[string]interface{}{
+				"Title": "Daftar",
+				"Error": "Gagal membuat sekolah baru",
+			})
+		}
+		sid, _ := res.LastInsertId()
+		schoolID = int(sid)
+		role = "admin" // Creator becomes admin
+
+	} else if req.SchoolCode != "" {
+		// Join Existing School
+		var sid int
+		err := h.DB.QueryRow("SELECT id FROM schools WHERE code = ?", req.SchoolCode).Scan(&sid)
+		if err != nil {
+			return c.Render(http.StatusOK, "auth/register.html", map[string]interface{}{
+				"Title": "Daftar",
+				"Error": "Kode sekolah tidak valid",
+			})
+		}
+		schoolID = sid
+	}
+
 	user := &models.User{
 		Username:     req.Username,
 		Email:        req.Email,
 		PasswordHash: hashedPassword,
 		FullName:     req.FullName,
 		Class:        req.Class,
-		Role:         "user",
+		Role:         role,
 		Points:       0,
+		SchoolID:     schoolID,
 	}
 
 	if err := h.UserRepo.Create(user); err != nil {
@@ -314,6 +355,14 @@ func (h *Handler) Register(c echo.Context) error {
 			"Title": "Daftar",
 			"Error": "Gagal mendaftar: username atau email sudah terdaftar",
 		})
+	}
+
+	// If Created School, update AdminID
+	if req.NewSchoolName != "" {
+		createdUser, _ := h.UserRepo.GetByUsername(req.Username)
+		if createdUser != nil {
+			_, _ = h.DB.Exec("UPDATE schools SET admin_id = ? WHERE id = ?", createdUser.ID, schoolID)
+		}
 	}
 
 	return c.Redirect(http.StatusSeeOther, "/login")
@@ -332,6 +381,11 @@ func (h *Handler) Logout(c echo.Context) error {
 // User Handlers
 func (h *Handler) UserDashboard(c echo.Context) error {
 	user := c.Get("user").(*models.User)
+
+	// Superadmin should never be here — redirect to admin panel
+	if user.Role == "superadmin" {
+		return c.Redirect(http.StatusSeeOther, "/admin/dashboard")
+	}
 
 	today := time.Now().Format("2006-01-02")
 	prayer, _ := h.PrayerRepo.GetByUserAndDate(user.ID, today)
@@ -363,6 +417,9 @@ func (h *Handler) UserDashboard(c echo.Context) error {
 	todayPoints, _ := h.AmaliahRepo.GetTodayPoints(user.ID)
 
 	totalReadings, _ := h.QuranRepo.GetTotalReadings(user.ID)
+	
+	// NEW: Get Total Fasting
+	totalFasting, _ := h.FastingRepo.GetTotalFasting(user.ID)
 
 	prayerStreak, bestPrayer, _ := h.PrayerRepo.GetPrayerStreak(user.ID)
 	fastingStreak, bestFasting, _ := h.FastingRepo.GetFastingStreak(user.ID)
@@ -393,6 +450,79 @@ func (h *Handler) UserDashboard(c echo.Context) error {
 	newBadges, _ := h.BadgeService.CheckAndAwardBadges(user.ID)
 	userBadges, _ := h.BadgeRepo.GetUserBadges(user.ID)
 
+	// NEW: Prepare Chart Data (Quran Monthly Progress)
+	type DailyQuranStat struct {
+		Day    int
+		Target int
+		Actual int
+	}
+	var quranChartData []DailyQuranStat
+	
+	now := time.Now()
+	// Get start and end of current month
+	startOfMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	nextMonth := now.AddDate(0, 1, 0)
+	lastDayOfMonth := time.Date(nextMonth.Year(), nextMonth.Month(), 0, 0, 0, 0, 0, nextMonth.Location())
+	
+	startOfMonthStr := startOfMonth.Format("2006-01-02") 
+	endOfMonthStr := lastDayOfMonth.Format("2006-01-02")
+
+	// Get readings for the month
+	monthReadings, _ := h.QuranRepo.GetByDateRange(user.ID, startOfMonthStr, endOfMonthStr)
+	
+	// Map readings to date
+	readingsMap := make(map[int]int) // day -> pages
+	for _, r := range monthReadings {
+		t, _ := time.Parse("2006-01-02", r.Date)
+		readingsMap[t.Day()] += r.Pages
+	}
+
+	// Calculate Daily Target
+	targetKhatam := user.TargetKhatam
+	if targetKhatam <= 0 {
+		targetKhatam = 30 // Default 30 days
+	}
+	dailyTarget := int(math.Ceil(604.0 / float64(targetKhatam)))
+
+	// Fill chart data for all days in month
+	daysInMonth := lastDayOfMonth.Day()
+	for d := 1; d <= daysInMonth; d++ {
+		quranChartData = append(quranChartData, DailyQuranStat{
+			Day:    d,
+			Target: dailyTarget,
+			Actual: readingsMap[d],
+		})
+	}
+
+	// Format Date for Dashboard header
+	indonesianMonths := []string{"", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
+	currentDate := time.Now()
+	formattedDate := fmt.Sprintf("%d %s %d", currentDate.Day(), indonesianMonths[currentDate.Month()], currentDate.Year())
+	
+	location := user.Kabkota
+	if location == "" {
+		location = user.Provinsi
+	}
+	if location == "" {
+		location = "Indonesia"
+	}
+	dashboardDate := fmt.Sprintf("%s, %s", location, formattedDate)
+
+	// Get School Name, Code, and Status
+	schoolName := ""
+	schoolCode := ""
+	schoolPending := false
+	if user.SchoolID > 0 {
+		var name, code, status string
+		err := h.DB.QueryRow("SELECT name, code, status FROM schools WHERE id = ?", user.SchoolID).Scan(&name, &code, &status)
+		if err == nil {
+			schoolName = name
+			schoolCode = code
+			schoolPending = status == "pending"
+		}
+	}
+
+
 	return c.Render(http.StatusOK, "user/dashboard.html", map[string]interface{}{
 		"Title":           "Dashboard",
 		"User":            user,
@@ -402,11 +532,17 @@ func (h *Handler) UserDashboard(c echo.Context) error {
 		"TodayPoints":     todayPoints,
 		"TodayCompleted":  todayCompleted,
 		"TotalReadings":   totalReadings,
+		"TotalFasting":    totalFasting,
 		"Streak":          streak,
 		"TodaySchedule":   todaySchedule,
 		"ImsakiyahData":   imsakiyahData,
 		"UserBadges":      userBadges,
 		"NewBadges":       newBadges,
+		"QuranChartData":  quranChartData,
+		"DashboardDate":   dashboardDate,
+		"SchoolName":      schoolName,
+		"SchoolCode":      schoolCode,
+		"SchoolPending":   schoolPending,
 	})
 }
 
@@ -509,6 +645,7 @@ func (h *Handler) ShowFasting(c echo.Context) error {
 	}
 
 	// Build calendar days
+	// Build calendar days
 	type CalendarDay struct {
 		Day     int
 		Date    string
@@ -526,28 +663,70 @@ func (h *Handler) ShowFasting(c echo.Context) error {
 	nextMonth := today.AddDate(0, 1, 0)
 	lastDay := time.Date(nextMonth.Year(), nextMonth.Month(), 0, 0, 0, 0, 0, nextMonth.Location()).Day()
 
+    // Calculate stats manually for "Assumed Puasa"
+    notFastingCount := 0
+    daysPassed := 0
+    if today.Month() == startOfMonth.Month() {
+        daysPassed = today.Day()
+    } else if today.After(startOfMonth) {
+         // If today is after this month (viewing past month?), handle logic. 
+         // But here startOfMonth is based on today. So we are viewing current month.
+         daysPassed = today.Day()
+    }
+
 	for day := 1; day <= lastDay; day++ {
 		dateStr := time.Date(today.Year(), today.Month(), day, 0, 0, 0, 0, today.Location()).Format("2006-01-02")
+        isPast := dateStr < todayStr
+        isToday := dateStr == todayStr // Logic check: today is dateStr?
 
 		dayData := CalendarDay{
 			Day:     day,
 			Date:    dateStr,
 			HasData: false,
-			IsToday: dateStr == todayStr,
-			IsPast:  dateStr < todayStr,
+			IsToday: isToday,
+			IsPast:  isPast,
 		}
 
 		if f, exists := fastingMap[dateStr]; exists {
 			dayData.HasData = true
 			dayData.Status = f.Status
 			dayData.Reason = f.Reason
-		}
+            
+            if f.Status == "tidak" && day <= daysPassed {
+                notFastingCount++
+            }
+		} else if isPast {
+             // AUTO-FILL 'Puasa' for past days
+             dayData.HasData = true
+             dayData.Status = "puasa"
+             dayData.Reason = ""
+        }
 
 		calendarDays = append(calendarDays, dayData)
 	}
 
-	// Get stats
-	stats, _ := h.FastingRepo.GetFastingStats(user.ID, startOfMonthStr, todayStr)
+	// Override DB stats with "Assumed" stats
+    // Fasting = DaysPassed - NotFasting
+    fastingCount := daysPassed - notFastingCount
+    if fastingCount < 0 { fastingCount = 0 }
+    
+    // Total days to show in stats (Progress)
+    // Usually total days of Ramadhan (30)? Or days passed?
+    // Template shows "Stats.fasting / Stats.total_days". 
+    // If total_days is 30, then progress bar works.
+    // If total_days is daysPassed, it's 100%.
+    // DB GetFastingStats returned "total_days" as count(*) of rows.
+    
+    // Let's use 30 (or lastDay) as total RAMADHAN days for context, 
+    // OR just days passed for accurate "Progress so far".
+    // User request: "Progress Puasa... belum nandain".
+    // Let's update stats to reflect "Days Passed".
+    
+	stats := map[string]int{
+        "fasting": fastingCount,
+        "not_fasting": notFastingCount,
+        "total_days": daysPassed, 
+    }
 
 	// Format today's date for display
 	months := []string{"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
@@ -784,14 +963,22 @@ func (h *Handler) SaveAmaliah(c echo.Context) error {
 		}
 	} else {
 		// Add amaliah
+		// Check if already exists for today
+		today := time.Now().Format("2006-01-02")
+		_, err := h.AmaliahRepo.GetDailyAmaliahByType(user.ID, amaliahTypeID, today)
+		if err == nil {
+			// Already exists, do not add again
+			return c.Redirect(http.StatusSeeOther, "/user/amaliah")
+		}
+
 		da := &models.DailyAmaliah{
 			UserID:        user.ID,
 			AmaliahTypeID: amaliahTypeID,
-			Date:          time.Now().Format("2006-01-02"),
+			Date:          today,
 			Notes:         notes,
 		}
 
-		err := h.AmaliahRepo.CreateDailyAmaliah(da)
+		err = h.AmaliahRepo.CreateDailyAmaliah(da)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to save amaliah"})
 		}
@@ -835,6 +1022,57 @@ func (h *Handler) AdminDashboard(c echo.Context) error {
 	// Get charts data
 	dashboardStats, _ := h.StatisticsService.GetDashboardStats()
 
+	// Get school list with member count
+	type SchoolStat struct {
+		ID      int
+		Name    string
+		Code    string
+		Members int
+	}
+	var schools []SchoolStat
+	rows, err := h.DB.Query(`
+		SELECT s.id, s.name, s.code, COUNT(u.id) as member_count
+		FROM schools s
+		LEFT JOIN users u ON u.school_id = s.id
+		GROUP BY s.id
+		ORDER BY s.name ASC
+	`)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var sc SchoolStat
+			if err := rows.Scan(&sc.ID, &sc.Name, &sc.Code, &sc.Members); err == nil {
+				schools = append(schools, sc)
+			}
+		}
+	}
+
+	// Get pending admin registration requests
+	type PendingSchool struct {
+		SchoolID   int
+		SchoolName string
+		AdminName  string
+		Phone      string
+		SchoolLevel string
+		StudentCount int
+	}
+	var pendingSchools []PendingSchool
+	pendingRows, err := h.DB.Query(`
+		SELECT id, school_name, full_name, phone, school_level, student_count
+		FROM admin_requests
+		WHERE status = 'pending'
+		ORDER BY created_at ASC
+	`)
+	if err == nil {
+		defer pendingRows.Close()
+		for pendingRows.Next() {
+			var ps PendingSchool
+			if err := pendingRows.Scan(&ps.SchoolID, &ps.SchoolName, &ps.AdminName, &ps.Phone, &ps.SchoolLevel, &ps.StudentCount); err == nil {
+				pendingSchools = append(pendingSchools, ps)
+			}
+		}
+	}
+
 	return c.Render(http.StatusOK, "admin/dashboard.html", map[string]interface{}{
 		"Title":             "Admin Dashboard",
 		"User":              user,
@@ -848,6 +1086,10 @@ func (h *Handler) AdminDashboard(c echo.Context) error {
 		"PrayerPercentage":  prayerPercentage,
 		"FastingPercentage": fastingPercentage,
 		"DashboardStats":    dashboardStats,
+		"Schools":           schools,
+		"PendingSchools":    pendingSchools,
+		"Success":           c.QueryParam("success"),
+		"Error":             c.QueryParam("error"),
 	})
 }
 
@@ -1346,6 +1588,57 @@ func (h *Handler) UpdateProfile(c echo.Context) error {
 	return c.Redirect(http.StatusSeeOther, "/user/profile?success=Profil berhasil diperbarui")
 }
 
+func (h *Handler) UpdateAvatar(c echo.Context) error {
+	user := c.Get("user").(*models.User)
+
+	// Source
+	file, err := c.FormFile("avatar")
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/user/profile?error=Gagal mengupload avatar")
+	}
+	src, err := file.Open()
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/user/profile?error=Gagal membuka file")
+	}
+	defer src.Close()
+
+	// Destination
+	// Ensure directory exists
+	uploadDir := "web/static/uploads/avatars"
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/user/profile?error=Gagal membuat direktori upload")
+	}
+
+	// Generate unique filename
+	ext := filepath.Ext(file.Filename)
+	filename := fmt.Sprintf("%d_%d%s", user.ID, time.Now().Unix(), ext)
+	dstPath := filepath.Join(uploadDir, filename)
+
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/user/profile?error=Gagal menyimpan file")
+	}
+	defer dst.Close()
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return c.Redirect(http.StatusSeeOther, "/user/profile?error=Gagal menyalin file")
+	}
+
+	// Update User Avatar in DB
+	// We need to update the user struct and save it.
+	// Assuming UserRepo has Update method or we handle it here.
+	// Since UserRepo.Update updates everything, let's just update the field manually or use a specific method.
+	// For simplicity, let's update the specific field via DB exec or UserRepo update.
+	// Let's check UserRepo.Update implementation later or just do a direct exec for now to be safe/fast.
+	_, err = h.DB.Exec("UPDATE users SET avatar = ? WHERE id = ?", filename, user.ID)
+	if err != nil {
+		return c.Redirect(http.StatusSeeOther, "/user/profile?error=Gagal memperbarui database")
+	}
+
+	return c.Redirect(http.StatusSeeOther, "/user/profile?success=Avatar berhasil diperbarui")
+}
+
 func (h *Handler) ChangePassword(c echo.Context) error {
 	user := c.Get("user").(*models.User)
 
@@ -1423,6 +1716,46 @@ func (h *Handler) GetImsakiyahAPI(c echo.Context) error {
 	return c.JSON(http.StatusOK, data)
 }
 
+func (h *Handler) AutoDetectLocation(c echo.Context) error {
+	latStr := c.FormValue("lat")
+	longStr := c.FormValue("long")
+
+	lat, err := strconv.ParseFloat(latStr, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid latitude"})
+	}
+	long, err := strconv.ParseFloat(longStr, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid longitude"})
+	}
+
+	// 1. Reverse Geocode
+	detectedProv, detectedCity, err := h.ShalatService.ReverseGeocode(lat, long)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Gagal mendeteksi lokasi: " + err.Error()})
+	}
+
+	// 2. Match with API Data
+	matchedProv, matchedCity, err := h.ShalatService.MatchLocation(detectedProv, detectedCity)
+	
+	// Prepare response
+	response := map[string]string{
+		"detected_prov": detectedProv,
+		"detected_city": detectedCity,
+		"provinsi":     matchedProv,
+		"kabkota":      matchedCity,
+	}
+
+	if err != nil {
+		response["status"] = "partial_match"
+		response["message"] = "Lokasi terdeteksi namun tidak cocok sempurna dengan database. Silakan sesuaikan manual."
+	} else {
+		response["status"] = "success"
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
 // Middleware
 func (h *Handler) AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
@@ -1475,7 +1808,7 @@ func (h *Handler) AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.Redirect(http.StatusSeeOther, "/login")
 		}
 
-		if user.Role != "admin" {
+		if user.Role != "superadmin" {
 			return c.Redirect(http.StatusSeeOther, "/user/dashboard")
 		}
 

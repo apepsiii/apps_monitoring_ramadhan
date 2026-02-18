@@ -144,6 +144,11 @@ func runApplication() {
 	e.POST("/login", h.Login)
 	e.GET("/logout", h.Logout)
 
+	// Public Admin Registration
+	e.GET("/register-admin", h.ShowAdminRegister)
+	e.POST("/register-admin", h.AdminRegister)
+	e.GET("/register-admin/thanks", h.AdminRegisterThanks)
+
 	// Protected Routes Group
 	user := e.Group("/user")
 	user.Use(h.AuthMiddleware)
@@ -167,10 +172,19 @@ func runApplication() {
 	// Profile Routes
 	user.GET("/profile", h.ShowProfile)
 	user.POST("/profile", h.UpdateProfile)
+	user.POST("/profile/avatar", h.UpdateAvatar)
 	user.POST("/profile/change-password", h.ChangePassword)
 	user.GET("/certificate", h.DownloadCertificate)
 
+	// School Routes (auth required)
+	school := e.Group("/school")
+	school.Use(h.AuthMiddleware)
+	school.GET("/admin", h.SchoolAdminDashboard)
+	school.POST("/admin/update", h.SchoolUpdate)
+	school.GET("/member/remove/:id", h.SchoolRemoveMember)
+
 	// API Routes (protected)
+	user.POST("/api/location/autodetect", h.AutoDetectLocation)
 	user.GET("/api/imsakiyah", h.GetImsakiyahAPI)
 
 	// Admin Routes Group
@@ -185,6 +199,8 @@ func runApplication() {
 	admin.GET("/users/edit/:id", h.EditUser)
 	admin.POST("/users/update/:id", h.UpdateUser)
 	admin.GET("/users/delete/:id", h.DeleteUser)
+	admin.GET("/school/approve/:id", h.SchoolApprove)
+	admin.GET("/school/reject/:id", h.SchoolReject)
 	admin.GET("/users/detail/:id", h.ShowUserDetail)
 	admin.GET("/reports", h.ShowReports)
 	admin.GET("/reports/generate", h.GenerateReport)

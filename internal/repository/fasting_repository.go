@@ -122,6 +122,13 @@ func (r *FastingRepository) GetFastingStats(userID int, startDate, endDate strin
 	return stats, nil
 }
 
+func (r *FastingRepository) GetTotalFasting(userID int) (int, error) {
+	query := `SELECT COUNT(*) FROM fastings WHERE user_id = ? AND status = 'puasa'`
+	var total int
+	err := r.DB.QueryRow(query, userID).Scan(&total)
+	return total, err
+}
+
 // Admin Methods
 
 func (r *FastingRepository) GetTodayStats(date string) (map[string]int, error) {

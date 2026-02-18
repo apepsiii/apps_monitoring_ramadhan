@@ -148,6 +148,47 @@ func RunMigrations(db *sql.DB) error {
 
 	migrations = append(migrations, badgeMigrations...)
 
+	// Simplify Amaliah Types (User Request)
+	simplifyAmaliahMigration := []string{
+		`UPDATE amaliah_types SET is_active = 0`, // Deactivate all existing types
+		`INSERT INTO amaliah_types (name, description, points, icon, is_active) VALUES 
+			('Shalat Sunnah', 'Melaksanakan shalat sunnah (Dhuha, Tahajud, Rawatib, dll)', 20, 'star', 1),
+			('Interaksi Al-Quran', 'Membaca (Tilawah) atau Menghafal (Tahfidz) Al-Quran', 20, 'book', 1),
+			('Dzikir & Shalawat', 'Melakukan dzikir pagi/petang, istighfar, atau bershalawat', 10, 'moon', 1),
+			('Sedekah', 'Bersedekah kepada yang membutuhkan', 10, 'heart', 1),
+			('Birrul Walidain', 'Membantu dan berbakti kepada orang tua', 10, 'home', 1),
+			('Menuntut Ilmu', 'Mengikuti kajian atau belajar ilmu agama', 10, 'book-open', 1)
+		`,
+	}
+	migrations = append(migrations, simplifyAmaliahMigration...)
+
+    // Update Amaliah Points (V8 - 80 Points Limit)
+    // Actually, since we are using "INSERT INTO", the previous migration might have already run.
+    // If we just edit the previous migration code, it won't re-run on existing DB.
+    // We need a NEW migration to UPDATE the points if they were already inserted.
+    updatePointsMigration := []string{
+        `UPDATE amaliah_types SET points = 20 WHERE name IN ('Shalat Sunnah', 'Interaksi Al-Quran') AND is_active = 1`,
+        `UPDATE amaliah_types SET points = 10 WHERE name IN ('Dzikir & Shalawat', 'Sedekah', 'Birrul Walidain', 'Menuntut Ilmu') AND is_active = 1`,
+    }
+    migrations = append(migrations, updatePointsMigration...)
+
+
+	// School Feature Migrations
+	schoolMigrations := []string{
+		`CREATE TABLE IF NOT EXISTS schools (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name VARCHAR(100) NOT NULL,
+			code VARCHAR(20) UNIQUE NOT NULL,
+			address TEXT,
+			admin_id INTEGER,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (admin_id) REFERENCES users(id)
+		)`,
+		`CREATE INDEX IF NOT EXISTS idx_schools_code ON schools(code)`,
+	}
+	migrations = append(migrations, schoolMigrations...)
+
 	// Performance Indexes
 	indexMigrations := []string{
 		`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username)`,
@@ -175,6 +216,15 @@ func RunMigrations(db *sql.DB) error {
 	if err := addColumnIfNotExists(db, "users", "kabkota", "VARCHAR(100) DEFAULT ''"); err != nil {
 		log.Printf("Note: %v", err)
 	}
+	if err := addColumnIfNotExists(db, "users", "school_id", "INTEGER DEFAULT 0"); err != nil {
+		log.Printf("Note: %v", err)
+	}
+
+	// Create index for school_id after column is added
+	_, err := db.Exec("CREATE INDEX IF NOT EXISTS idx_users_school_id ON users(school_id)")
+	if err != nil {
+		log.Printf("Note: Failed to create index idx_users_school_id: %v", err)
+	}
 
 	if err := seedAdminUser(db); err != nil {
 		log.Printf("Failed to seed admin user: %v", err)
@@ -183,6 +233,30 @@ func RunMigrations(db *sql.DB) error {
 	// Add pages column to quran_readings
 	if err := addColumnIfNotExists(db, "quran_readings", "pages", "INTEGER DEFAULT 0"); err != nil {
 		log.Printf("Note: %v", err)
+	}
+
+	// School approval flow: add status column
+	if err := addColumnIfNotExists(db, "schools", "status", "VARCHAR(20) DEFAULT 'active'"); err != nil {
+		log.Printf("Note: %v", err)
+	}
+
+	// Admin registration requests table
+	adminRequestMigration := `CREATE TABLE IF NOT EXISTS admin_requests (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		full_name VARCHAR(100) NOT NULL,
+		phone VARCHAR(20) NOT NULL,
+		school_name VARCHAR(100) NOT NULL,
+		school_address TEXT,
+		school_level VARCHAR(50),
+		student_count INTEGER DEFAULT 0,
+		username VARCHAR(50) NOT NULL,
+		email VARCHAR(100) NOT NULL,
+		password_hash VARCHAR(255) NOT NULL,
+		status VARCHAR(20) DEFAULT 'pending',
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	)`
+	if _, err := db.Exec(adminRequestMigration); err != nil {
+		log.Printf("Note: admin_requests migration: %v", err)
 	}
 
 	return nil
@@ -207,7 +281,7 @@ func addColumnIfNotExists(db *sql.DB, table, column, definition string) error {
 
 func seedAdminUser(db *sql.DB) error {
 	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE role = 'admin'").Scan(&count)
+	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE role = 'superadmin'").Scan(&count)
 	if err != nil {
 		return err
 	}
@@ -224,11 +298,11 @@ func seedAdminUser(db *sql.DB) error {
 	query := `INSERT INTO users (username, email, password_hash, full_name, class, role, points, avatar, bio, theme) 
 			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	_, err = db.Exec(query, "admin", "admin@ramadhan.com", string(hashedPassword), "Administrator", "", "admin", 0, "default", "", "emerald")
+	_, err = db.Exec(query, "admin", "admin@ramadhan.com", string(hashedPassword), "Administrator", "", "superadmin", 0, "default", "", "emerald")
 	if err != nil {
 		return err
 	}
 
-	log.Println("Default admin user created: admin / admin123")
+	log.Println("Default superadmin user created: admin / admin123")
 	return nil
 }

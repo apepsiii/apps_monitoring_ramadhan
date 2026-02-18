@@ -1,0 +1,135 @@
+{{define "content"}}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Admin Sekolah</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-50 min-h-screen font-inter">
+
+<div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <div class="islamic-pattern text-white px-5 pt-12 pb-8 text-center">
+        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+        </div>
+        <h1 class="text-2xl font-bold">Daftar Admin Sekolah</h1>
+        <p class="text-white/70 text-sm mt-1">Isi form berikut untuk mendaftarkan sekolah Anda</p>
+    </div>
+
+    <!-- Form -->
+    <div class="flex-1 px-5 py-6 -mt-4">
+        <div class="bg-white rounded-2xl card-shadow p-5 space-y-5">
+
+            {{if .Error}}
+            <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+                ⚠️ {{.Error}}
+            </div>
+            {{end}}
+
+            <form method="POST" action="/register-admin" class="space-y-5">
+
+                <!-- Section: Data Pribadi -->
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Data Pribadi</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span class="text-red-500">*</span></label>
+                            <input type="text" name="full_name" required placeholder="Nama lengkap Anda"
+                                value="{{.FormData.FullName}}"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor HP / WhatsApp <span class="text-red-500">*</span></label>
+                            <input type="tel" name="phone" required placeholder="08xxxxxxxxxx"
+                                value="{{.FormData.Phone}}"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Data Sekolah -->
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Data Sekolah</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah <span class="text-red-500">*</span></label>
+                            <input type="text" name="school_name" required placeholder="Contoh: SMA Negeri 1 Jakarta"
+                                value="{{.FormData.SchoolName}}"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Sekolah</label>
+                            <textarea name="school_address" rows="2" placeholder="Alamat lengkap sekolah"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none">{{.FormData.SchoolAddress}}</textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jenjang <span class="text-red-500">*</span></label>
+                                <select name="school_level" required
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all bg-white">
+                                    <option value="">Pilih...</option>
+                                    <option value="SD" {{if eq .FormData.SchoolLevel "SD"}}selected{{end}}>SD / MI</option>
+                                    <option value="SMP" {{if eq .FormData.SchoolLevel "SMP"}}selected{{end}}>SMP / MTs</option>
+                                    <option value="SMA" {{if eq .FormData.SchoolLevel "SMA"}}selected{{end}}>SMA / MA</option>
+                                    <option value="SMK" {{if eq .FormData.SchoolLevel "SMK"}}selected{{end}}>SMK</option>
+                                    <option value="Pesantren" {{if eq .FormData.SchoolLevel "Pesantren"}}selected{{end}}>Pesantren</option>
+                                    <option value="Lainnya" {{if eq .FormData.SchoolLevel "Lainnya"}}selected{{end}}>Lainnya</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Siswa</label>
+                                <input type="number" name="student_count" min="1" placeholder="0"
+                                    value="{{.FormData.StudentCount}}"
+                                    class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Akun Login -->
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Akun Login</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
+                            <input type="text" name="username" required placeholder="username unik"
+                                value="{{.FormData.Username}}"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email <span class="text-red-500">*</span></label>
+                            <input type="email" name="email" required placeholder="email@sekolah.com"
+                                value="{{.FormData.Email}}"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+                            <input type="password" name="password" required placeholder="Minimal 6 karakter"
+                                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full gradient-primary text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-all active:scale-95">
+                    Kirim Pendaftaran
+                </button>
+            </form>
+
+            <p class="text-center text-xs text-gray-400">
+                Sudah punya akun? <a href="/login" class="text-primary font-medium">Masuk di sini</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+{{end}}

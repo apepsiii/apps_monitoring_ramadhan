@@ -71,3 +71,12 @@ func GetEndOfMonth() string {
 	endOfMonth := startOfNextMonth.AddDate(0, 0, -1)
 	return endOfMonth.Format("2006-01-02")
 }
+
+func GenerateRandomString(n int) string {
+	const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letters[time.Now().UnixNano()%int64(len(letters))]
+	}
+	return string(b)
+}

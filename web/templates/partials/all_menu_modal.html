@@ -1,0 +1,133 @@
+{{define "partials/all_menu_modal.html"}}
+<div id="allMenuModal" class="fixed inset-0 bg-black/60 z-50 hidden items-end justify-center backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div class="bg-white rounded-t-3xl w-full max-w-md max-h-[85vh] overflow-y-auto transform translate-y-full transition-transform duration-300 menu-modal-content">
+        
+        <!-- Handle & Header -->
+        <div class="sticky top-0 bg-white z-20 pt-4 pb-2 px-6 border-b border-gray-50">
+            <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4"></div>
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">Menu Lengkap</h3>
+                <button onclick="closeAllMenuModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-6 grid grid-cols-4 gap-4">
+            <!-- Main Features -->
+            <a href="/user/prayers" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <img src="/images/shalat.png" class="w-8 h-8 object-contain">
+                </div>
+                <span class="text-xs font-medium text-gray-700">Shalat</span>
+            </a>
+
+            <a href="/user/fasting" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+                    <img src="/images/puasa.png" class="w-8 h-8 object-contain">
+                </div>
+                <span class="text-xs font-medium text-gray-700">Puasa</span>
+            </a>
+
+            <a href="/user/quran" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center group-hover:bg-teal-100 transition-colors">
+                    <img src="/images/quran.png" class="w-8 h-8 object-contain">
+                </div>
+                <span class="text-xs font-medium text-gray-700">Al-Quran</span>
+            </a>
+
+            <a href="/user/amaliah" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center group-hover:bg-yellow-100 transition-colors">
+                    <img src="/images/amaliah.png" class="w-8 h-8 object-contain">
+                </div>
+                <span class="text-xs font-medium text-gray-700">Amaliah</span>
+            </a>
+
+            <!-- Islamic Content -->
+            <a href="/user/jadwal" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <img src="/images/jadwal.png" class="w-8 h-8 object-contain">
+                </div>
+                <span class="text-xs font-medium text-gray-700">Imsakiyah</span>
+            </a>
+
+            <a href="/user/doa" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center group-hover:bg-green-100 transition-colors">
+                    <img src="/images/doa.png" class="w-8 h-8 object-contain">
+                </div>
+                <span class="text-xs font-medium text-gray-700">Doa</span>
+            </a>
+
+            <a href="/user/hadits" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center group-hover:bg-orange-100 transition-colors">
+                    <img src="/images/hadis.png" class="w-8 h-8 object-contain">
+                </div>
+                <span class="text-xs font-medium text-gray-700">Hadits</span>
+            </a>
+
+            <a href="/user/quran-indonesia" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-cyan-50 rounded-2xl flex items-center justify-center group-hover:bg-cyan-100 transition-colors">
+                    <img src="/images/qurandigital.png" class="w-8 h-8 object-contain">
+                </div>
+                <span class="text-xs font-medium text-gray-700">Quran Digital</span>
+            </a>
+
+            <!-- Account -->
+            <a href="/user/profile" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-gray-100 transition-colors">
+                    <span class="text-2xl">👤</span>
+                </div>
+                <span class="text-xs font-medium text-gray-700">Profil Saya</span>
+            </a>
+
+            <a href="/logout" class="flex flex-col items-center text-center gap-2 group">
+                <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                    <span class="text-2xl">🚪</span>
+                </div>
+                <span class="text-xs font-medium text-gray-700">Keluar</span>
+            </a>
+        </div>
+        
+        <div class="p-6 pt-0">
+             <div class="bg-gray-50 rounded-xl p-4 text-center">
+                <p class="text-xs text-gray-400">Amaliah Ramadhan App v1.0.0</p>
+                <p class="text-[10px] text-gray-300 mt-1">SMK NIBA Business School</p>
+             </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openAllMenuModal() {
+        const modal = document.getElementById('allMenuModal');
+        const content = modal.querySelector('.menu-modal-content');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('flex');
+            content.classList.remove('translate-y-full');
+            content.classList.add('translate-y-0');
+        }, 10);
+    }
+
+    function closeAllMenuModal() {
+        const modal = document.getElementById('allMenuModal');
+        const content = modal.querySelector('.menu-modal-content');
+        
+        modal.classList.add('opacity-0');
+        content.classList.remove('translate-y-0');
+        content.classList.add('translate-y-full');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    }
+
+    document.getElementById('allMenuModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAllMenuModal();
+        }
+    });
+</script>
+{{end}}

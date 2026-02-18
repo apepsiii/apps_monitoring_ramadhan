@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type User struct {
 	ID           int       `json:"id"`
@@ -17,6 +19,7 @@ type User struct {
 	TargetKhatam int       `json:"target_khatam"`
 	Provinsi     string    `json:"provinsi"`
 	Kabkota      string    `json:"kabkota"`
+	SchoolID     int       `json:"school_id"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -111,12 +114,16 @@ type LoginRequest struct {
 }
 
 type RegisterRequest struct {
-	Username string `json:"username" form:"username"`
-	Email    string `json:"email" form:"email"`
-	Password string `json:"password" form:"password"`
-	FullName string `json:"full_name" form:"full_name"`
-	Class    string `json:"class" form:"class"`
+	Username      string `json:"username" form:"username"`
+	Email         string `json:"email" form:"email"`
+	Password      string `json:"password" form:"password"`
+	FullName      string `json:"full_name" form:"full_name"`
+	Class         string `json:"class" form:"class"`
+	SchoolCode    string `json:"school_code" form:"school_code"`         // For joining
+	NewSchoolName string `json:"new_school_name" form:"new_school_name"` // For creating
 }
+
+
 
 type Streak struct {
 	UserID        int `json:"user_id"`

@@ -1,0 +1,127 @@
+{{define "content"}}
+<div class="min-h-screen bg-warm-50 pb-24">
+    <!-- Header -->
+    <header class="gradient-header text-white pt-safe-top relative overflow-hidden">
+        <div class="absolute inset-0 opacity-5">
+            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <circle cx="85" cy="15" r="40" fill="white"/>
+                <circle cx="15" cy="85" r="35" fill="white"/>
+            </svg>
+        </div>
+        <div class="px-5 py-5 relative">
+            <div class="flex items-center gap-3 mb-1">
+                <a href="/user/dashboard" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </a>
+                <div>
+                    <h1 class="text-xl font-bold">Bergabung dengan Sekolah</h1>
+                    <p class="text-white/70 text-xs">Gabung atau buat sekolah baru</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-5 py-6 space-y-4 fade-in">
+
+        {{if .Error}}
+        <div class="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm">
+            ⚠️ {{.Error}}
+        </div>
+        {{end}}
+
+        {{if .Success}}
+        <div class="bg-green-50 border border-green-200 text-green-700 rounded-xl p-4 text-sm">
+            ✅ {{.Success}}
+        </div>
+        {{end}}
+
+        <!-- Tab Toggle: show Buat Baru only for admins -->
+        {{if .IsAdmin}}
+        <div class="bg-white rounded-2xl card-shadow p-1 flex">
+            <button id="btn-join" onclick="switchTab('join')"
+                class="flex-1 py-2.5 text-sm font-semibold rounded-xl bg-primary text-white transition-all">
+                Gabung Sekolah
+            </button>
+            <button id="btn-create" onclick="switchTab('create')"
+                class="flex-1 py-2.5 text-sm font-semibold rounded-xl text-gray-500 hover:text-gray-700 transition-all">
+                Buat Sekolah Baru
+            </button>
+        </div>
+        {{end}}
+
+        <!-- Join Form -->
+        <div id="panel-join" class="bg-white rounded-2xl card-shadow p-6 space-y-4">
+            <div class="text-center mb-2">
+                <span class="text-4xl">🔑</span>
+                <h2 class="text-lg font-bold text-gray-800 mt-2">Masukkan Kode Sekolah</h2>
+                <p class="text-sm text-gray-500">Minta kode dari admin sekolah Anda</p>
+            </div>
+            <form action="/school/join" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kode Sekolah</label>
+                    <input type="text" name="code" placeholder="Contoh: AB12CD34"
+                        class="input-field text-center text-lg font-mono tracking-widest uppercase"
+                        required autocomplete="off" maxlength="10">
+                    <p class="text-xs text-gray-400 mt-1 text-center">Kode tidak peka huruf besar/kecil</p>
+                </div>
+                <button type="submit" class="w-full btn-primary py-3">
+                    Bergabung →
+                </button>
+            </form>
+        </div>
+
+        <!-- Create Form (hidden by default) -->
+        <div id="panel-create" class="hidden bg-white rounded-2xl card-shadow p-6 space-y-4">
+            <div class="text-center mb-2">
+                <span class="text-4xl">🏫</span>
+                <h2 class="text-lg font-bold text-gray-800 mt-2">Buat Sekolah Baru</h2>
+                <p class="text-sm text-gray-500">Anda akan menjadi admin sekolah ini</p>
+            </div>
+            <form action="/school/create" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah</label>
+                    <input type="text" name="name" placeholder="Contoh: SMA Negeri 1 Jakarta"
+                        class="input-field" required>
+                </div>
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
+                    <strong>Info:</strong> Kode unik akan dibuat otomatis. Bagikan kode tersebut kepada siswa agar bisa bergabung.
+                </div>
+                <button type="submit" class="w-full btn-primary py-3">
+                    Buat Sekolah +
+                </button>
+            </form>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    function switchTab(tab) {
+        const btnJoin = document.getElementById('btn-join');
+        const btnCreate = document.getElementById('btn-create');
+        const panelJoin = document.getElementById('panel-join');
+        const panelCreate = document.getElementById('panel-create');
+
+        const activeClass = ['bg-primary', 'text-white'];
+        const inactiveClass = ['text-gray-500', 'hover:text-gray-700'];
+
+        if (tab === 'join') {
+            btnJoin.classList.add(...activeClass);
+            btnJoin.classList.remove(...inactiveClass);
+            btnCreate.classList.remove(...activeClass);
+            btnCreate.classList.add(...inactiveClass);
+            panelJoin.classList.remove('hidden');
+            panelCreate.classList.add('hidden');
+        } else {
+            btnCreate.classList.add(...activeClass);
+            btnCreate.classList.remove(...inactiveClass);
+            btnJoin.classList.remove(...activeClass);
+            btnJoin.classList.add(...inactiveClass);
+            panelCreate.classList.remove('hidden');
+            panelJoin.classList.add('hidden');
+        }
+    }
+</script>
+{{end}}

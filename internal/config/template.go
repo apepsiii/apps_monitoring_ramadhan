@@ -80,6 +80,7 @@ func NewTemplateRenderer(embedFS fs.FS) *TemplateRenderer {
 	// Specific pages will be parsed in Render()
 	patterns := []string{
 		"templates/layouts/*.html",
+		"templates/partials/*.html",
 		// "templates/*.html", // Don't parse pages yet to avoid block conflicts
 		// "templates/auth/*.html",
 		// "templates/user/*.html",

@@ -437,5 +437,5 @@ Atur logrotate untuk mencegah log terlalu besar
 
 Untuk bantuan lebih lanjut, hubungi administrator sistem atau tim development.
 
-**SMK NIBA Isep Misbah**
+**SMK NIBA Business School Bogor**
 Monitoring Ibadah Harian Ramadhan

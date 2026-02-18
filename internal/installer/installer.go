@@ -47,7 +47,7 @@ func (i *Installer) ShowBanner() {
 ║        🌙 AMALIAH RAMADHAN - SMK NIBA INSTALLER 🌙      ║
 ║                                                          ║
 ║              Monitoring Ibadah Harian Ramadhan          ║
-║                   SMK NIBA Isep Misbah                  ║
+║                   SMK NIBA Business School Bogor                  ║
 ║                                                          ║
 ╚══════════════════════════════════════════════════════════╝
 `
