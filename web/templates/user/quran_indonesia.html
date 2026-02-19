@@ -1,22 +1,22 @@
 {{define "content"}}
 <div class="min-h-screen pb-20">
     {{if .SelectedSurah}}
-    <header class="gradient-header text-white safe-top sticky top-0 z-10">
+    <header class="bg-white border-b border-gray-100 pt-safe-top sticky top-0 z-10">
         <div class="px-4 py-4">
             <div class="flex items-center justify-between">
-                <a href="/user/quran-indonesia" class="flex items-center text-white/90 hover:text-white">
+                <a href="/user/quran-indonesia" class="flex items-center text-gray-600 hover:text-blue-800">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                     <span class="text-sm">Kembali</span>
                 </a>
                 {{if .SelectedSurah.AudioURL}}
-                <a href="{{.SelectedSurah.AudioURL}}" target="_blank" class="flex items-center bg-white/20 px-3 py-1.5 rounded-full text-sm">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                <button onclick="playAudio('{{.SelectedSurah.AudioURL}}', '{{.SelectedSurah.NameID}}', 'Surah {{.SelectedSurah.Number}}')" class="flex items-center bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full text-sm text-gray-700 transition-colors">
+                    <svg class="w-4 h-4 mr-1 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M8 5v14l11-7z"/>
                     </svg>
                     Audio
-                </a>
+                </button>
                 {{end}}
             </div>
         </div>
@@ -54,11 +54,11 @@
                         <span class="text-primary font-bold text-sm">{{.Ayah}}</span>
                     </div>
                     {{if .Audio}}
-                    <a href="{{.Audio}}" target="_blank" class="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center">
+                    <button onclick="playAudio('{{.Audio}}', 'Surah {{$.SelectedSurah.NameID}}', 'Ayat {{.Ayah}}')" class="w-9 h-9 rounded-full bg-accent/10 flex items-center justify-center hover:bg-accent/20 transition-colors">
                         <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
                         </svg>
-                    </a>
+                    </button>
                     {{end}}
                 </div>
                 
@@ -85,22 +85,22 @@
         {{end}}
     </main>
     {{else}}
-    <header class="islamic-pattern text-white safe-top sticky top-0 z-10">
+    <header class="bg-white border-b border-gray-100 safe-top sticky top-0 z-10">
         <div class="px-4 py-6">
             <div class="flex items-center justify-between mb-4">
                 <div>
-                    <h1 class="text-xl font-bold">Al-Quran Indonesia</h1>
-                    <p class="text-white/80 text-sm">Bacaan Lengkap dengan Terjemah</p>
+                    <h1 class="text-xl font-bold text-gray-900">Al-Quran Indonesia</h1>
+                    <p class="text-gray-500 text-sm">Bacaan Lengkap dengan Terjemah</p>
                 </div>
-                <a href="/user/dashboard" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="/user/dashboard" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </a>
             </div>
-            <div class="bg-white/10 rounded-xl p-4 text-center">
-                <p class="font-arabic text-2xl mb-1">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
-                <p class="text-sm text-white/80">Bismillahirrahmanirrahim</p>
+            <div class="bg-blue-50 rounded-xl p-4 text-center border border-blue-100">
+                <p class="font-arabic text-2xl mb-1 text-blue-900">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+                <p class="text-sm text-blue-600">Bismillahirrahmanirrahim</p>
             </div>
         </div>
     </header>
@@ -139,7 +139,154 @@
         </div>
         {{end}}
     </main>
+    
+
     {{end}}
+    
+    <!-- Audio Player Overlay -->
+    <div id="audioPlayerOverlay" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg transform translate-y-full transition-transform duration-300 z-50">
+        <div class="max-w-md mx-auto px-4 py-3">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex-1 min-w-0 mr-4">
+                    <h4 id="audioTitle" class="text-sm font-semibold text-gray-900 truncate">Select Audio</h4>
+                    <p id="audioSubtitle" class="text-xs text-gray-500 truncate">...</p>
+                </div>
+                <button onclick="closeAudioPlayer()" class="text-gray-400 hover:text-gray-600 p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <audio id="audioElement" ontimeupdate="updateProgress()" onended="resetPlayer()"></audio>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="toggleAudio()" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-primary-dark transition-colors" id="playPauseBtn">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" id="playIcon">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24" id="pauseIcon">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                </button>
+                
+                <div class="flex-1">
+                    <div class="bg-gray-200 rounded-full h-1.5 cursor-pointer relative" onclick="seekAudio(event)">
+                        <div id="progressBar" class="bg-primary h-1.5 rounded-full w-0 transition-all duration-100"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 mt-1">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audioPlayerOverlay = document.getElementById('audioPlayerOverlay');
+        const audioElement = document.getElementById('audioElement');
+        const audioTitle = document.getElementById('audioTitle');
+        const audioSubtitle = document.getElementById('audioSubtitle');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        
+        function playAudio(url, title, subtitle) {
+            audioElement.src = url;
+            audioTitle.textContent = title;
+            audioSubtitle.textContent = subtitle || '';
+            
+            audioPlayerOverlay.classList.remove('translate-y-full');
+            
+            audioElement.play().then(() => {
+                showPauseIcon();
+            }).catch(error => {
+                console.error("Audio play failed:", error);
+            });
+        }
+        
+        function toggleAudio() {
+            if (audioElement.paused) {
+                audioElement.play();
+                showPauseIcon();
+            } else {
+                audioElement.pause();
+                showPlayIcon();
+            }
+        }
+        
+        function closeAudioPlayer() {
+            audioElement.pause();
+            audioPlayerOverlay.classList.add('translate-y-full');
+            setTimeout(() => {
+                audioElement.src = '';
+                progressBar.style.width = '0%';
+                currentTimeEl.textContent = '0:00';
+                durationEl.textContent = '0:00';
+                showPlayIcon();
+            }, 300);
+        }
+        
+        function showPlayIcon() {
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+        }
+        
+        function showPauseIcon() {
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+        }
+        
+        function updateProgress() {
+            const percent = (audioElement.currentTime / audioElement.duration) * 100;
+            progressBar.style.width = `${percent}%`;
+            
+            currentTimeEl.textContent = formatTime(audioElement.currentTime);
+            if (!isNaN(audioElement.duration)) {
+                durationEl.textContent = formatTime(audioElement.duration);
+            }
+        }
+        
+        function seekAudio(event) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const width = rect.width;
+            const percent = clickX / width;
+            
+            if (!isNaN(audioElement.duration)) {
+                audioElement.currentTime = percent * audioElement.duration;
+            }
+        }
+        
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+        
+        function resetPlayer() {
+            showPlayIcon();
+            progressBar.style.width = '0%';
+            currentTimeEl.textContent = '0:00';
+        }
+
+        // Handle bottom nav padding
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.classList.contains('translate-y-full')) {
+                    document.body.style.paddingBottom = '0';
+                } else {
+                    document.body.style.paddingBottom = '120px'; // Space for player + nav
+                }
+            });
+        });
+        
+        observer.observe(audioPlayerOverlay, { attributes: true, attributeFilter: ['class'] });
+    </script>
+
 
     {{template "partials/bottom_nav.html" .}}
     {{template "partials/all_menu_modal.html" .}}

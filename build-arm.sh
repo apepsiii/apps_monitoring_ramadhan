@@ -18,7 +18,13 @@ NC='\033[0m' # No Color
 
 # Variables
 APP_NAME="amaliah-ramadhan"
-VERSION="1.0.0"
+# Load version from .env if available
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+    VERSION=${APP_VERSION:-"1.0.0"}
+else
+    VERSION="1.0.0"
+fi
 DATE=$(date +%Y%m%d)
 BUILD_DIR="build"
 DIST_DIR="dist"

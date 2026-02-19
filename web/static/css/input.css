@@ -12,14 +12,14 @@
 
 @layer base {
   :root {
-    --primary: 13 126 94;
-    --primary-dark: 10 99 73;
-    --accent: 212 175 55;
-    --accent-dark: 184 148 31;
+    --primary: 30 64 175;        /* #1E40AF dark blue */
+    --primary-dark: 30 58 138;   /* #1E3A8A darker blue */
+    --accent: 59 130 246;        /* #3B82F6 blue-500 */
+    --accent-dark: 37 99 235;    /* #2563EB blue-600 */
     --success: 16 185 129;
     --warning: 245 158 11;
     --danger: 239 68 68;
-    --warm-bg: 248 247 244;
+    --warm-bg: 248 250 252;      /* #F8FAFC near white */
   }
   
   html {
@@ -27,7 +27,7 @@
   }
   
   body {
-    @apply bg-warm-50 text-gray-900 antialiased dark:bg-gray-900 dark:text-gray-100;
+    @apply bg-slate-50 text-gray-900 antialiased;
     font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
   }
   
@@ -38,44 +38,44 @@
 
 @layer components {
   .card {
-    @apply bg-white rounded-card shadow-card p-4 dark:bg-gray-800 dark:border dark:border-gray-700;
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
   }
   
   .card-soft {
-    @apply bg-white/80 backdrop-blur-sm rounded-card shadow-soft p-4 dark:bg-gray-800/80 dark:border dark:border-gray-700;
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
   }
   
   .card-glass {
-    @apply bg-white/80 backdrop-blur-md rounded-card p-5 dark:bg-gray-900/80 dark:border dark:border-gray-700;
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5;
   }
   
   .card-gradient {
-    @apply bg-gradient-warm rounded-card shadow-card p-5;
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5;
   }
 
   .btn-primary {
-    @apply w-full bg-primary text-white font-semibold py-3.5 px-6 rounded-xl 
-           hover:bg-primary-700 active:bg-primary-800 transition-all duration-200
-           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
-           shadow-card hover:shadow-card-hover;
+    @apply w-full bg-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl 
+           hover:bg-blue-900 active:bg-blue-950 transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-blue-800 focus:ring-offset-2
+           shadow-sm;
   }
   
   .btn-primary-gradient {
-    @apply w-full bg-gradient-primary text-white font-semibold py-3.5 px-6 rounded-xl 
-           hover:opacity-90 active:opacity-80 transition-all duration-200
-           shadow-card hover:shadow-card-hover;
+    @apply w-full bg-blue-800 text-white font-semibold py-3.5 px-6 rounded-xl 
+           hover:bg-blue-900 active:bg-blue-950 transition-all duration-200
+           shadow-sm;
   }
   
   .btn-secondary {
-    @apply w-full bg-white text-primary font-semibold py-3.5 px-6 rounded-xl 
-           border-2 border-primary hover:bg-primary-50 active:bg-primary-100 
+    @apply w-full bg-white text-blue-800 font-semibold py-3.5 px-6 rounded-xl 
+           border border-blue-800 hover:bg-blue-50 active:bg-blue-100 
            transition-all duration-200;
   }
   
   .btn-accent {
-    @apply w-full bg-accent text-white font-semibold py-3.5 px-6 rounded-xl 
-           hover:bg-accent-600 active:bg-accent-700 transition-all duration-200
-           shadow-card hover:shadow-card-hover;
+    @apply w-full bg-blue-600 text-white font-semibold py-3.5 px-6 rounded-xl 
+           hover:bg-blue-700 active:bg-blue-800 transition-all duration-200
+           shadow-sm;
   }
   
   .btn-ghost {
@@ -84,10 +84,9 @@
   }
 
   .input-field {
-    @apply w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white/50
-           focus:border-primary focus:ring-2 focus:ring-primary/20 
-           transition-all duration-200 outline-none placeholder:text-gray-400
-           dark:bg-gray-800/50 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500;
+    @apply w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-white
+           focus:border-blue-800 focus:ring-2 focus:ring-blue-800/10 
+           transition-all duration-200 outline-none placeholder:text-gray-400;
   }
   
   .input-field-error {
@@ -95,9 +94,9 @@
   }
   
   .input-search {
-    @apply w-full px-4 py-3 rounded-xl bg-white/10 border-none
-           text-white placeholder:text-white/60
-           focus:ring-2 focus:ring-white/20 outline-none transition-all;
+    @apply w-full px-4 py-3 rounded-xl bg-gray-100 border-none
+           text-gray-800 placeholder:text-gray-400
+           focus:ring-2 focus:ring-blue-800/20 outline-none transition-all;
   }
 
   .prayer-status {
@@ -105,11 +104,11 @@
   }
   
   .prayer-status-jamaah {
-    @apply bg-primary-100 text-primary-700 ring-1 ring-primary-200;
+    @apply bg-blue-100 text-blue-800 ring-1 ring-blue-200;
   }
   
   .prayer-status-sendiri {
-    @apply bg-teal-100 text-teal-700 ring-1 ring-teal-200;
+    @apply bg-sky-100 text-sky-700 ring-1 ring-sky-200;
   }
   
   .prayer-status-belum {
@@ -122,11 +121,11 @@
 
   .nav-item {
     @apply flex flex-col items-center justify-center py-2 px-3 text-gray-400 
-           hover:text-primary transition-colors duration-200;
+           hover:text-blue-800 transition-colors duration-200;
   }
   
   .nav-item-active {
-    @apply text-primary;
+    @apply text-blue-800;
   }
 
   .progress-ring {
@@ -134,36 +133,56 @@
   }
   
   .stat-card {
-    @apply bg-gradient-primary text-white 
-           rounded-2xl p-5 shadow-card;
+    @apply bg-blue-800 text-white rounded-2xl p-5 shadow-sm;
   }
   
   .stat-card-accent {
-    @apply bg-gradient-accent text-white 
-           rounded-2xl p-5 shadow-card;
+    @apply bg-blue-600 text-white rounded-2xl p-5 shadow-sm;
   }
   
   .stat-card-soft {
-    @apply bg-white/80 backdrop-blur-sm text-gray-900 
-           rounded-2xl p-5 shadow-soft dark:bg-gray-800 dark:text-white;
+    @apply bg-white text-gray-900 rounded-2xl p-5 shadow-sm border border-gray-100;
   }
 
   .floating-action-btn {
-    @apply fixed bottom-24 right-4 w-14 h-14 bg-gradient-primary text-white 
-           rounded-full shadow-card flex items-center justify-center
-           hover:shadow-card-hover active:scale-95 transition-all;
+    @apply fixed bottom-24 right-4 w-14 h-14 bg-blue-800 text-white 
+           rounded-full shadow-lg flex items-center justify-center
+           hover:bg-blue-900 active:scale-95 transition-all;
   }
   
+  /* Clean white header — no gradient */
   .header-gradient {
-    @apply bg-gradient-header text-white;
+    @apply bg-white text-gray-900 border-b border-gray-100;
   }
   
   .header-islamic {
-    @apply bg-gradient-primary text-white;
+    @apply bg-white text-gray-900 border-b border-gray-100;
   }
   
   .header-islamic-soft {
-    @apply bg-primary text-white;
+    @apply bg-white text-gray-900 border-b border-gray-100;
+  }
+
+  /* Gradient classes now map to flat blue */
+  .gradient-primary {
+    background: #1E40AF;
+  }
+  
+  .gradient-accent {
+    background: #3B82F6;
+  }
+  
+  .gradient-header {
+    background: #ffffff;
+    border-bottom: 1px solid #E5E7EB;
+    color: #111827;
+  }
+
+  /* Islamic pattern: now white with subtle blue border */
+  .islamic-pattern {
+    background-color: #ffffff;
+    border-bottom: 1px solid #E5E7EB;
+    color: #111827;
   }
 
   .badge {
@@ -171,11 +190,11 @@
   }
   
   .badge-primary {
-    @apply bg-primary-100 text-primary-700;
+    @apply bg-blue-100 text-blue-800;
   }
   
   .badge-accent {
-    @apply bg-accent-100 text-accent-700;
+    @apply bg-blue-50 text-blue-600;
   }
   
   .badge-success {
@@ -183,29 +202,29 @@
   }
 
   .streak-fire {
-    @apply inline-flex items-center gap-1 text-accent font-bold;
+    @apply inline-flex items-center gap-1 text-amber-500 font-bold;
   }
   
   .streak-card {
-    @apply card-soft text-center py-4 px-3;
+    @apply card text-center py-4 px-3;
   }
 
   .surah-card {
-    @apply card-soft flex items-center gap-4 hover:shadow-card-hover transition-shadow cursor-pointer;
+    @apply card flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer;
   }
   
   .surah-number {
-    @apply w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center
-           text-primary font-bold text-sm;
+    @apply w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center
+           text-blue-800 font-bold text-sm;
   }
   
   .surah-number-accent {
-    @apply w-10 h-10 bg-accent-100 rounded-lg flex items-center justify-center
-           text-accent-700 font-bold text-sm;
+    @apply w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center
+           text-blue-600 font-bold text-sm;
   }
 
   .ayah-card {
-    @apply card-soft mb-4;
+    @apply card mb-4;
   }
   
   .ayah-text {
@@ -221,12 +240,12 @@
   }
   
   .amaliah-card {
-    @apply card-soft text-center py-4 cursor-pointer hover:shadow-card-hover transition-all
+    @apply card text-center py-4 cursor-pointer hover:shadow-md transition-all
            active:scale-95;
   }
   
   .amaliah-card-done {
-    @apply bg-primary-50 ring-2 ring-primary;
+    @apply bg-blue-50 ring-2 ring-blue-800;
   }
   
   .amaliah-icon {
@@ -234,16 +253,16 @@
   }
   
   .amaliah-icon-primary {
-    @apply bg-primary-100;
+    @apply bg-blue-100;
   }
   
   .amaliah-icon-accent {
-    @apply bg-accent-100;
+    @apply bg-blue-50;
   }
 
   .tasbih-counter {
-    @apply w-48 h-48 mx-auto rounded-full bg-gradient-to-br from-primary to-primary-700
-           shadow-card-hover flex flex-col items-center justify-center text-white;
+    @apply w-48 h-48 mx-auto rounded-full bg-blue-800
+           shadow-lg flex flex-col items-center justify-center text-white;
   }
   
   .tasbih-count {
@@ -259,11 +278,11 @@
   }
   
   .tasbih-progress-bar {
-    @apply h-full bg-accent rounded-full transition-all duration-300;
+    @apply h-full bg-blue-300 rounded-full transition-all duration-300;
   }
 
   .doa-card {
-    @apply card-soft flex items-center gap-4 hover:shadow-card-hover transition-shadow cursor-pointer;
+    @apply card flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer;
   }
   
   .doa-icon {
@@ -280,16 +299,24 @@
   }
   
   .container-mobile {
-    @apply max-w-md mx-auto bg-warm-50 min-h-screen relative;
+    @apply max-w-md mx-auto bg-slate-50 min-h-screen relative;
   }
   
   .container-rounded {
-    @apply container-mobile rounded-container overflow-hidden;
+    @apply container-mobile overflow-hidden;
   }
 
   .islamic-pattern-bg {
-    background-color: #0D7E5E;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-color: #ffffff;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .card-shadow {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  
+  .card-shadow-lg {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
 }
 
@@ -319,8 +346,8 @@
   }
 
   .bg-islamic-pattern {
-    background-color: #0D7E5E;
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-color: #ffffff;
+    border-bottom: 1px solid #E5E7EB;
   }
 
   .divide-islamic > * + * {

@@ -1,34 +1,25 @@
 {{define "content"}}
-<div class="min-h-screen bg-warm-50 pb-24">
-    <header class="gradient-header text-white pt-safe-top relative overflow-hidden">
-        <div class="absolute inset-0 opacity-5">
-            <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <circle cx="85" cy="15" r="40" fill="white"/>
-                <circle cx="15" cy="85" r="35" fill="white"/>
-            </svg>
-        </div>
-        <div class="px-5 py-4 relative">
+<div class="min-h-screen bg-slate-50 pb-24">
+    <header class="bg-white border-b border-gray-100 pt-safe-top sticky top-0 z-10">
+        <div class="px-5 py-4">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                         <span class="text-lg">👤</span>
                     </div>
                     <div>
-                        <p class="text-white/70 text-xs">Assalamu'alaikum</p>
-                        <h1 class="text-lg font-semibold">{{.User.FullName}}</h1>
+                        <p class="text-gray-400 text-xs">Assalamu'alaikum</p>
+                        <h1 class="text-base font-semibold text-gray-900">{{.User.FullName}}</h1>
                         {{if .SchoolName}}
-                        <p class="text-white/80 text-xs mt-0.5 flex items-center gap-1">
-                            <span class="opacity-70">🏫</span> {{.SchoolName}}
+                        <p class="text-gray-500 text-xs mt-0.5 flex items-center gap-1">
+                            <span>🏫</span> {{.SchoolName}}
                         </p>
-                        {{if .SchoolCode}}
-                        <p class="text-white/60 text-[10px] ml-6">Kode: <span class="font-mono text-white/90 tracking-wider">{{.SchoolCode}}</span></p>
-                        {{end}}
                         {{end}}
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="/user/profile" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <a href="/user/profile" class="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                        <svg class="w-4.5 h-4.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
@@ -38,24 +29,25 @@
 
             {{if eq .User.Role "admin"}}
             <!-- School admin: manage school button -->
-            <div class="mt-4">
-                <a href="/school/admin" class="block w-full bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl p-3 flex items-center justify-between transition-all">
+            <div class="mt-3">
+                <a href="/school/admin" class="block w-full bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl p-3 flex items-center justify-between transition-all">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
                             <span class="text-base">🏫</span>
                         </div>
                         <div>
-                            <h3 class="text-sm font-semibold text-white">Kelola Sekolah</h3>
-                            <p class="text-[10px] text-white/70">Atur siswa &amp; informasi sekolah</p>
+                            <h3 class="text-sm font-semibold text-blue-900">Kelola Sekolah</h3>
+                            <p class="text-[10px] text-blue-600">Atur siswa &amp; informasi sekolah</p>
                         </div>
                     </div>
-                    <svg class="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </a>
             </div>
             {{end}}
         </div>
+    </header>
 
 
 
@@ -204,6 +196,234 @@
             </div>
         </div>
     </main>
+
+    <!-- Stats Modal -->
+    <div id="statsModal" class="fixed inset-0 z-50 hidden flex justify-center items-end sm:items-center">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity opacity-0" id="statsModalBackdrop" onclick="closeStatsModal()"></div>
+        <div class="relative w-full max-w-md bg-[#f4f7f5] rounded-t-3xl sm:rounded-3xl p-5 transform translate-y-full sm:translate-y-0 transition-transform duration-300 max-h-[85vh] overflow-y-auto scrollbar-hide" id="statsModalContent">
+            <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5 sm:hidden"></div>
+            
+            <style>
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .stat-card-new {
+                    background: #ffffff;
+                    border-radius: 20px;
+                    padding: 20px;
+                    margin-bottom: 16px;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+                    border: 1px solid rgba(76, 175, 80, 0.1);
+                    position: relative;
+                }
+                .v-bar {
+                    flex: 1;
+                    background-color: #e8f5e9;
+                    border-radius: 4px;
+                    height: 100%;
+                    position: relative;
+                }
+                .v-bar::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    background-color: #43a047;
+                    border-radius: 4px;
+                    opacity: 0.85;
+                }
+                .stat-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
+                    margin-bottom: 16px;
+                }
+                .stat-item {
+                    background-color: #e8f5e9;
+                    padding: 16px;
+                    border-radius: 20px;
+                    position: relative;
+                    min-height: 120px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    border: 1px solid rgba(0,0,0,0.02);
+                    overflow: hidden;
+                }
+                .stat-img-icon {
+                    position: absolute;
+                    bottom: -8px;
+                    right: -8px;
+                    width: 60px;
+                    height: 60px;
+                    opacity: 0.8;
+                    transform: rotate(-10deg);
+                    object-fit: contain;
+                }
+            </style>
+
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-xl font-bold text-[#1b5e20]">Statistik Ibadah</h3>
+                <button onclick="closeStatsModal()" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:bg-gray-300 transition-colors">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Overall Progress -->
+            <div class="stat-card-new">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-[#1b5e20] text-base m-0">Aktivitas Ramadhan</h3>
+                    <span class="text-lg font-extrabold text-[#1b5e20]">{{printf "%.0f" (calcPercentage .User.Points 1000)}}%</span>
+                </div>
+                
+                <div class="flex justify-between items-end h-[50px] mb-5 gap-1" id="barContainer">
+                    <!-- Bars will be generated by JS -->
+                </div>
+
+                <div class="w-full py-3 bg-[#2e7d32] text-white rounded-xl font-semibold text-center shadow-lg shadow-green-900/20 text-sm">
+                    Total Poin: {{.User.Points}}
+                </div>
+            </div>
+
+            <!-- Grid Stats -->
+            <div class="stat-grid">
+                <!-- Points Card -->
+                <div class="stat-item">
+                    <div>
+                        <div class="text-[#558b2f] font-semibold text-xs">Total Points</div>
+                        <div class="text-[#1b5e20] text-xl font-extrabold mt-1">{{.User.Points}}</div>
+                    </div>
+                    <img src="/images/points.png" class="stat-img-icon" alt="Points">
+                </div>
+
+                <!-- Al Quran Card -->
+                <div class="stat-item">
+                    <div>
+                        <div class="text-[#558b2f] font-semibold text-xs">Al Quran</div>
+                        <div class="text-[#1b5e20] text-xl font-extrabold mt-1">{{.TotalReadings}}x</div>
+                    </div>
+                    <img src="/images/quran.png" class="stat-img-icon" alt="Quran">
+                </div>
+            </div>
+
+            <!-- Amaliah Card (Full Width) -->
+            <div class="stat-item mb-4 w-full">
+                <div class="relative z-10 w-3/4">
+                    <div class="text-[#558b2f] font-semibold text-xs">Amaliah Sunnah</div>
+                    <div class="text-[#1b5e20] text-2xl font-extrabold mt-1">{{.TodayCompleted}} <span class="text-xs font-normal text-gray-500">/ 7 Selesai</span></div>
+                    <p class="text-[10px] text-green-700 mt-2 bg-white/50 inline-block px-2 py-1 rounded-lg">
+                        {{if eq .TodayCompleted 7}}MashaAllah Sempurna!
+                        {{else if gt .TodayCompleted 4}}Hampir Sempurna
+                        {{else}}Ayo Semangat Lagi!{{end}}
+                    </p>
+                </div>
+                <img src="/images/amaliah.png" class="stat-img-icon" style="width: 80px; height: 80px; right: 0; bottom: -12px;" alt="Amaliah">
+            </div>
+
+            <!-- Detailed Progress -->
+            <div class="stat-card-new">
+                <h3 class="font-bold text-[#1b5e20] mb-4 text-base">Detail Ibadah</h3>
+
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs font-semibold text-[#1b5e20] mb-1.5">
+                        <span>Shalat Wajib</span>
+                        <span>{{.PrayerCompleted}}/5</span>
+                    </div>
+                    <div class="w-full h-2 bg-[#e8f5e9] rounded-full overflow-hidden">
+                        <div class="h-full bg-[#43a047] rounded-full" style="width: {{if eq .PrayerCompleted 0}}5{{else}}{{printf "%.0f" (calcPercentage .PrayerCompleted 5)}}{{end}}%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="flex justify-between text-xs font-semibold text-[#1b5e20] mb-1.5">
+                        <span>Puasa</span>
+                        <span>{{if .Fasting}}{{if eq .Fasting.Status "puasa"}}100%{{else}}0%{{end}}{{else}}0%{{end}}</span>
+                    </div>
+                    <div class="w-full h-2 bg-[#e8f5e9] rounded-full overflow-hidden">
+                        <div class="h-full bg-[#43a047] rounded-full" style="width: {{if .Fasting}}{{if eq .Fasting.Status "puasa"}}100{{else}}5{{end}}{{else}}5{{end}}%"></div>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <div class="flex justify-between text-xs font-semibold text-[#1b5e20] mb-1.5">
+                        <span>Target Khatam</span>
+                        <span>{{printf "%.0f" (calcPercentage .TotalReadings 604)}}%</span>
+                    </div>
+                    <div class="w-full h-2 bg-[#e8f5e9] rounded-full overflow-hidden">
+                        <div class="h-full bg-[#43a047] rounded-full" style="width: {{if eq .TotalReadings 0}}5{{else}}{{printf "%.0f" (calcPercentage .TotalReadings 604)}}{{end}}%"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function openStatsModal() {
+            const modal = document.getElementById('statsModal');
+            const backdrop = document.getElementById('statsModalBackdrop');
+            const content = document.getElementById('statsModalContent');
+            const container = document.getElementById('barContainer');
+            
+            // Generate random bars for visual effect
+            if (container.children.length === 0) {
+                for (let i = 0; i < 20; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'v-bar';
+                    // Random height for the 'after' pseudo-element logic simulation
+                    // Since we can't easily modify pseudo-elements via JS inline styles, 
+                    // we'll use a child div instead for the fill
+                    const fill = document.createElement('div');
+                    fill.style.position = 'absolute';
+                    fill.style.bottom = '0';
+                    fill.style.left = '0';
+                    fill.style.width = '100%';
+                    fill.style.backgroundColor = '#43a047';
+                    fill.style.borderRadius = '4px';
+                    fill.style.opacity = '0.85';
+                    
+                    // Random height between 20% and 90%
+                    const height = Math.floor(Math.random() * 70) + 20;
+                    fill.style.height = height + '%';
+                    
+                    bar.appendChild(fill);
+                    container.appendChild(bar);
+                }
+            }
+            
+            modal.classList.remove('hidden');
+            // Trigger reflow
+            void modal.offsetWidth;
+            
+            backdrop.classList.remove('opacity-0');
+            content.classList.remove('translate-y-full');
+        }
+
+        function closeStatsModal() {
+            const modal = document.getElementById('statsModal');
+            const backdrop = document.getElementById('statsModalBackdrop');
+            const content = document.getElementById('statsModalContent');
+            
+            backdrop.classList.add('opacity-0');
+            content.classList.add('translate-y-full');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeStatsModal();
+            }
+        });
+    </script>
 
     {{template "partials/bottom_nav.html" .}}
     {{template "partials/all_menu_modal.html" .}}

@@ -1,6 +1,6 @@
 {{define "content"}}
-<div class="min-h-screen bg-warm-50 pb-24">
-    <header class="gradient-header text-white pt-safe-top relative overflow-hidden">
+<div class="min-h-screen bg-slate-50 pb-24">
+    <header class="bg-white border-b border-gray-100 pt-safe-top sticky top-0 z-10">
         <div class="absolute inset-0 opacity-5">
             <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <circle cx="85" cy="15" r="40" fill="white"/>
@@ -9,14 +9,14 @@
         </div>
         <div class="px-5 py-4 relative">
             <div class="flex items-center gap-3">
-                <a href="/user/dashboard" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+                <a href="/user/dashboard" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-lg font-semibold">Status Puasa</h1>
-                    <p class="text-white/70 text-xs">{{.TodayDate}}</p>
+                    <h1 class="text-lg font-semibold text-gray-900">Status Puasa</h1>
+                    <p class="text-gray-400 text-xs">{{.TodayDate}}</p>
                 </div>
             </div>
         </div>

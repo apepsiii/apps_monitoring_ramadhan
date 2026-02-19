@@ -72,6 +72,12 @@ func NewTemplateRenderer(embedFS fs.FS) *TemplateRenderer {
 		"subtract": func(a, b float64) float64 {
 			return a - b
 		},
+		"calcPercentage": func(current, total int) float64 {
+			if total == 0 {
+				return 0
+			}
+			return float64(current) / float64(total) * 100
+		},
 	}
 
 	tmpl := template.New("").Funcs(funcMap)

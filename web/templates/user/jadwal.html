@@ -33,13 +33,13 @@
         .tab-btn.active { background: linear-gradient(135deg, #0D7E5E 0%, #0A6349 100%); color: white; }
     </style>
 </head>
-<body class="bg-warm-50 min-h-screen pb-20">
-    <div class="max-w-md mx-auto bg-warm-50 min-h-screen relative">
+<body class="bg-slate-50 min-h-screen pb-20">
+    <div class="max-w-md mx-auto bg-slate-50 min-h-screen relative">
         <header class="gradient-primary text-white safe-top sticky top-0 z-10">
             <div class="px-4 py-4">
                 <div class="flex items-center justify-between mb-4">
                     <div>
-                        <h1 class="text-xl font-bold">Jadwal Shalat</h1>
+                        <h1 class="text-xl font-bold text-gray-900">Jadwal Shalat</h1>
                         <p class="text-white/80 text-sm">dan Imsakiyah Ramadhan</p>
                     </div>
                     <a href="/user/dashboard" class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
@@ -56,7 +56,7 @@
             <div class="bg-gradient-to-r from-primary to-teal-600 rounded-2xl p-4 text-white">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-white/80 text-xs mb-1">Assalamu'alaikum,</p>
+                        <p class="text-gray-500 text-xs mb-1">Assalamu'alaikum,</p>
                         <p class="font-bold text-lg">{{.User.FullName}}</p>
                         {{if and .User.Provinsi .User.Kabkota}}
                         <p class="text-white/70 text-sm mt-1">📍 {{.User.Kabkota}}, {{.User.Provinsi}}</p>

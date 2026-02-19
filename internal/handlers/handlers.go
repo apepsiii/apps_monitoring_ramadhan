@@ -542,6 +542,7 @@ func (h *Handler) UserDashboard(c echo.Context) error {
 		"DashboardDate":   dashboardDate,
 		"SchoolName":      schoolName,
 		"SchoolCode":      schoolCode,
+
 		"SchoolPending":   schoolPending,
 	})
 }

@@ -1,6 +1,6 @@
 {{define "content"}}
-<div class="min-h-screen bg-warm-50 pb-24">
-    <header class="gradient-header text-white pt-safe-top relative overflow-hidden">
+<div class="min-h-screen bg-slate-50 pb-24">
+    <header class="bg-white border-b border-gray-100 pt-safe-top sticky top-0 z-10">
         <div class="absolute inset-0 opacity-5">
             <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <circle cx="85" cy="15" r="40" fill="white"/>
@@ -9,14 +9,14 @@
         </div>
         <div class="px-5 py-4 relative">
             <div class="flex items-center gap-3">
-                <a href="/user/dashboard" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+                <a href="/user/dashboard" class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-lg font-semibold">Muroja'ah & Tilawah</h1>
-                    <p class="text-white/70 text-xs">Catat bacaan Quran harian</p>
+                    <h1 class="text-lg font-semibold text-gray-900">Muroja'ah & Tilawah</h1>
+                    <p class="text-gray-400 text-xs">Catat bacaan Quran harian</p>
                 </div>
             </div>
         </div>
@@ -48,7 +48,7 @@
                     <h2 class="text-2xl font-bold text-gray-800">{{.TotalReadings}} Kali <span class="text-sm font-normal text-gray-500">({{.TotalPages}} Hal)</span></h2>
                     <p class="text-xs text-gray-500 mt-2 italic font-arabic">"وَرَتِّلِ الْقُرْآنَ تَرْتِيلًا"</p>
                 </div>
-                <div class="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center shadow-card">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center shadow-sm">
                     <img src="/images/quran.png" alt="Quran" class="w-10 h-10 object-contain drop-shadow-md">
                 </div>
             </div>
@@ -78,7 +78,7 @@
             <form action="/user/quran" method="POST" class="space-y-5" id="quranForm">
                 <div class="bg-primary-50 rounded-2xl p-4 border-2 border-primary/20">
                     <div class="flex items-center mb-4">
-                        <div class="w-9 h-9 bg-gradient-primary rounded-full flex items-center justify-center mr-3 shadow-card">
+                        <div class="w-9 h-9 bg-blue-800 rounded-full flex items-center justify-center mr-3 shadow-sm">
                             <span class="text-white font-bold">1</span>
                         </div>
                         <h4 class="font-semibold text-gray-800">📖 Dimulai Dari</h4>
@@ -112,7 +112,7 @@
 
                 <div class="bg-accent-50 rounded-2xl p-4 border-2 border-accent/20">
                     <div class="flex items-center mb-4">
-                        <div class="w-9 h-9 bg-gradient-accent rounded-full flex items-center justify-center mr-3 shadow-card">
+                        <div class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center mr-3 shadow-sm">
                             <span class="text-white font-bold">2</span>
                         </div>
                         <h4 class="font-semibold text-gray-800">📖 Sampai Surah</h4>
@@ -230,9 +230,9 @@
             </h3>
             <div class="space-y-3">
                 {{range .TodayReadings}}
-                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-primary-50 to-accent-50 rounded-xl border border-primary/10">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center flex-shrink-0 shadow-card">
+                        <div class="w-12 h-12 bg-blue-800 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
                             <span class="font-bold text-white text-sm">{{.StartSurahID}}</span>
                         </div>
                         <div>

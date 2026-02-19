@@ -1,26 +1,14 @@
 {{define "content"}}
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar Admin Sekolah</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body class="bg-gray-50 min-h-screen font-inter">
-
 <div class="min-h-screen flex flex-col">
     <!-- Header -->
-    <div class="islamic-pattern text-white px-5 pt-12 pb-8 text-center">
-        <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="bg-white border-b border-gray-100 px-5 pt-8 pb-8 text-center">
+        <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
             </svg>
         </div>
-        <h1 class="text-2xl font-bold">Daftar Admin Sekolah</h1>
-        <p class="text-white/70 text-sm mt-1">Isi form berikut untuk mendaftarkan sekolah Anda</p>
+        <h1 class="text-2xl font-bold text-gray-900">Daftar Admin Sekolah</h1>
+        <p class="text-gray-500 text-sm mt-1">Isi form berikut untuk mendaftarkan sekolah Anda</p>
     </div>
 
     <!-- Form -->
@@ -118,7 +106,7 @@
                 </div>
 
                 <button type="submit"
-                    class="w-full gradient-primary text-white font-semibold py-3.5 rounded-xl hover:opacity-90 transition-all active:scale-95">
+                    class="btn-primary w-full text-white font-semibold py-3.5 rounded-xl transition-all active:scale-95">
                     Kirim Pendaftaran
                 </button>
             </form>
@@ -127,9 +115,5 @@
                 Sudah punya akun? <a href="/login" class="text-primary font-medium">Masuk di sini</a>
             </p>
         </div>
-    </div>
 </div>
-
-</body>
-</html>
 {{end}}
